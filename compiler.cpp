@@ -60,13 +60,13 @@ compile( const char filename[ PATH_MAX ], int mode )
     if ( spu.status == Failure )
         return spu;
 
-    char* comm =spu.assembler + spu.position;
+    char* comm =spu.assembler + spu.PC;
 
     printlg( "---| Starting compilation |---\n\n" );
 
     while ( my_strcmp( comm, "HLT" ) )
     {
-        if ( spu.position >= spu.assembler_size )
+        if ( spu.PC >= spu.assembler_size )
         {
             printlg(         "Assembler failure.\n" );
             fprintf( stderr, "Assembler failure, check log - file.\n" );
@@ -74,14 +74,13 @@ compile( const char filename[ PATH_MAX ], int mode )
             return spu;
         }
 
-        comm = spu.assembler + spu.position;
-        move_position( &spu ); //Moves position to the next argument
+        comm = spu.assembler + spu.PC;
 
         if ( !my_strcmp( comm, "PUSH" ) )
         {
-            mscan_double( spu.assembler + spu.position, &value );
+            mscan_double( spu.assembler + spu.PC, &value );
             print_byn( ostream_list, spu.byte_code_desc, PUSH, value );
-            move_position( &spu );
+            move_PC( &spu );
         }
         else if ( !my_strcmp( comm, "ADD" ) )
             print_byn( ostream_list, spu.byte_code_desc,  ADD, 0 );
@@ -94,9 +93,11 @@ compile( const char filename[ PATH_MAX ], int mode )
         else if ( !my_strcmp( comm, "MULT" ) )
             print_byn( ostream_list, spu.byte_code_desc, MULT, 0 );
         else if ( !my_strcmp( comm, "JMP" ) )
+            print_byn( ostream_list, spu.byte_code_desc, SQR, 0 );
+        else if ( !my_strcmp( comm, "JMP" ) )
         {
-            mscan_double( spu.assembler + spu.position, &value );
-            move_position( &spu );
+            move_PC( &spu );
+            mscan_double( spu.assembler + spu.PC, &value );
             print_byn( ostream_list, spu.byte_code_desc, JMP, value );
         }
         else
@@ -108,6 +109,7 @@ compile( const char filename[ PATH_MAX ], int mode )
             printlg( "> in %d line\n", count_lines( &spu ) );
             spu_dump( &spu );
         }
+        move_PC( &spu ); //Moves position to the next argument
     }
 
     if ( spu.status != Success )

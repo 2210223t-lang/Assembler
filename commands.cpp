@@ -112,7 +112,7 @@ sub( stack* stk )
 }
 
 int
-SQR( stack* stk )
+sqr( stack* stk )
 {
     assert( stk );
 

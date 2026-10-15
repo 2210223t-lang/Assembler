@@ -57,7 +57,7 @@ sub( stack* stk );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-SQR( stack* stk );
+sqr( stack* stk );
 
 /**
  * @brief Calculates factorial of last value of stack

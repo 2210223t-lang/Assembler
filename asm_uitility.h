@@ -19,6 +19,7 @@ enum codes
     MULT = 8,
     REST = 9,
     JMP = 10,
+    SQR = 11,
 };
 
 enum
@@ -39,17 +40,17 @@ label
 struct
 SPU
 {
-    int64_t* byte_code;
-    size_t position;
-    size_t code_size;
+    size_t             PC;
+    stack             stk;
+    label*         Labels;
+    StkError       status;
+    int64_t*    byte_code;
+    size_t      code_size;
+    char*       assembler;
     size_t assembler_size;
-    int byte_code_desc;
-    int assembler_desc;
-    char* assembler;
-    FILE* byte_code_file;
-    label* Labels;
-    StkError status;
-    stack stk;
+    int    byte_code_desc;
+    int    assembler_desc;
+    FILE*  byte_code_file;
 };
 
 uint64_t
@@ -65,7 +66,7 @@ size_t
 count_lines( SPU* spu );
 
 void
-move_position( SPU* spu );
+move_PC( SPU* spu );
 
 int
 my_strcmp( const char* a, const char* b );
@@ -75,3 +76,9 @@ spu_dump( SPU* spu );
 
 void
 my_printlg( char* var );
+
+void
+SPUrun_exit( SPU* spu );
+
+StkError
+SPUrun_init( SPU* spu );

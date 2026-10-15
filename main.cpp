@@ -18,7 +18,7 @@ main( int argc, char** argv )
 
     int mode = Terminal( argc, argv, input );
     SPU spu = compile( input, mode );
-    Start_Calc( &stk, spu.status );
+    Start_Calc( &spu );
 
     logger_close();
     return 0;

@@ -13,7 +13,7 @@
 #include "Stack/utility/log.h"
 #include "commands.h"
 #include "Stack/utility/Utility.h"
-#include "asm_uitility.h"
+#include "calc.h"
 
 
 int
@@ -57,7 +57,6 @@ void
 print_byte_code( int64_t* code, size_t size, size_t current_command )
 {
     assert( code );
-    assert( size );
 
     printlg( "---| Code status |---\n\n" );
 
@@ -98,29 +97,17 @@ Start_Calc( SPU* spu )
         return spu->status;
     }
 
-    size_t filesize = Getsize( "code/byte_code.txt" );
-
-    int istream = open( "code/byte_code.txt", O_RDONLY );
-    int64_t* code = ( int64_t* ) mmap( 0, filesize, PROT_READ, MAP_SHARED, istream, 0 );
-
-    if ( istream == -1 || code ==  MAP_FAILED )//< Checks opening file with byte code
-    {
-        $RT
-        printlg(         "Failed to open byte-code file in Start_Calc function\n" );
-        fprintf( stderr, "Failed to open byte-code file in Start_Calc function\n" );
-        return Failure;
-    }
+    SPUrun_init( spu );
 
     double temp = 0;
-    size_t PC = 0;
-    int64_t command = code[ PC ];
+    int64_t command = spu->byte_code[ spu->PC ];
     int current_line = 0;
 
 
     while ( command != HLT )
     {
-        command = code[ PC ];
-        print_byte_code( code, filesize / sizeof( int64_t ), PC );//< Log - output debugging function
+        command = spu->byte_code[ spu->PC ];
+        print_byte_code( spu->byte_code, spu->code_size / sizeof( int64_t ), spu->PC );//< Log - output debugging function
 
         switch( command )
         {
@@ -130,62 +117,66 @@ Start_Calc( SPU* spu )
                 return Success;
 
             case PUSH:
-                PC++;
-                push( stk, code[ PC ] );
-                PC++;
+                spu->PC++;
+                push( &spu->stk, spu->byte_code[ spu->PC ] );
+                spu->PC++;
                 current_line++;
                 break;
 
             case POP:
-                pop( stk );
-                PC++;
+                pop( &spu->stk );
+                spu->PC++;
                 current_line++;
                 break;
 
             case ADD:
-                sum( stk );
-                PC++;
+                sum( &spu->stk );
+                spu->PC++;
                 current_line++;
                 break;
 
             case SUB:
-                sub( stk );
-                PC++;
+                sub( &spu->stk );
+                spu->PC++;
                 current_line++;
                 break;
 
             case DIV:
-                div( stk );
-                PC++;
+                div( &spu->stk );
+                spu->PC++;
                 current_line++;
                 break;
 
             case OUT:
-                out( stk );
-                PC++;
+                out( &spu->stk );
+                spu->PC++;
                 current_line++;
                 break;
 
             case FACT:
-                fact( stk );
-                PC++;
+                fact( &spu->stk );
+                spu->PC++;
                 current_line++;
                 break;
 
             case MULT:
-                mult( stk );
-                PC++;
+                mult( &spu->stk );
+                spu->PC++;
                 current_line++;
                 break;
 
             case REST:
-                rest( stk );
-                PC++;
+                rest( &spu->stk );
+                spu->PC++;
                 current_line++;
                 break;
 
             case JMP:
-                jmp( &PC, code[ PC + 1 ] );
+                jmp( &( spu->PC ), spu->byte_code[ spu->PC + 1 ] );
+                break;
+
+            case SQR:
+                sqr( &spu->stk );
                 break;
 
             default:
@@ -198,7 +189,6 @@ Start_Calc( SPU* spu )
 
 
     printlg( "Ended running, hope that you're satisfied with the result\n" );
-    close( istream );
-    munmap( code, filesize );
+    SPUrun_exit( spu );
     return Success;
 }

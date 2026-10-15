@@ -58,7 +58,7 @@ count_lines( SPU* spu )
 
     size_t count = 0;
 
-    for ( int i = 0; i < spu->position; i++ )
+    for ( int i = 0; i < spu->PC; i++ )
         if( spu->assembler[ i ] == '\n' )
             count++;
 
@@ -66,16 +66,16 @@ count_lines( SPU* spu )
 }
 
 void
-move_position( SPU* spu )
+move_PC( SPU* spu )
 {
     assert( spu );
 
-    while ( spu->assembler[ spu->position ] != ' ' && spu->assembler[ spu->position ] != '\n' &&
-            spu->assembler[ spu->position ] != '\0' )
-        spu->position++;
+    while ( spu->assembler[ spu->PC ] != ' ' && spu->assembler[ spu->PC ] != '\n' &&
+            spu->assembler[ spu->PC ] != '\0' )
+        spu->PC++;
 
-    while( spu->assembler[ spu->position ] == ' ' || spu->assembler[ spu->position ] == '\n' )
-        spu->position++;
+    while( spu->assembler[ spu->PC ] == ' ' || spu->assembler[ spu->PC ] == '\n' )
+        spu->PC++;
 }
 
 int
@@ -105,7 +105,7 @@ comp_exit( SPU* spu )
 {
     assert( spu );
 
-    if ( !spu->assembler_desc || !spu->assembler || spu->position < 0 || !spu->byte_code_desc )
+    if ( !spu->assembler_desc || !spu->assembler || spu->PC < 0 || !spu->byte_code_desc )
     {
         printlg(         "Attempt to proceed comp_exit with incorrect dimensions.\n" );
         spu_dump( spu );
@@ -116,7 +116,7 @@ comp_exit( SPU* spu )
     close( spu->assembler_desc );
     munmap( spu->assembler, spu->assembler_size );
     spu->assembler_size = 0;
-    spu->position = 0;
+    spu->PC = 0;
     close( spu->byte_code_desc );
     spu->byte_code_desc = 0;
     spu->assembler_desc = 0;
@@ -143,7 +143,7 @@ SPUcomp_init( const char filename[ PATH_MAX ], SPU* spu )
     }
 
     spu->assembler_size = Getsize( filename );
-    spu->position = 0;
+    spu->PC = 0;
     spu->byte_code_desc = open( "code/byte_code.txt", O_WRONLY | O_CREAT );
 
     if ( spu->byte_code_desc == -1 )
@@ -164,15 +164,15 @@ spu_dump( SPU* spu )
 
     printlg( "---| Current SPU values |---\n\n"
              "byte_code = 0x%X\n"
-             "position = %zd\n"
+             "PC = %zd\n"
              "code_size = %zd\n"
              "assembler_size = %zd\n"
              "byte_code_desc = %d\n"
-             "assembler_desc %d\n"
+             "assembler_desc = %d\n"
              "assembler = 0x%X\n"
              "byte_code_file = 0x%X\n"
              "status = %d\n\n",
-             spu->byte_code,       spu->position,  spu->code_size,      spu->assembler_size, spu->byte_code_desc,
+             spu->byte_code,       spu->PC,        spu->code_size,      spu->assembler_size, spu->byte_code_desc,
              spu-> assembler_desc, spu->assembler, spu->byte_code_desc, spu->byte_code_file, spu->status );
 
     printlg( "----------------------------\n\n" );
@@ -186,4 +186,54 @@ my_printlg( char* var )
 
     while ( *var && *var != '\n' && *var != '\0' && *var != ' ' )
         printlg( "%c", *( var++ ) );
+}
+
+StkError
+SPUrun_init( SPU* spu )
+{
+    assert( spu );
+
+    if ( spu->status != Success )
+        return Failure;
+
+    stack_init( &spu->stk, 4 );
+
+    spu->code_size = Getsize( "code/byte_code.txt" );
+
+    spu->byte_code_desc = open( "code/byte_code.txt", O_RDONLY );
+    spu->byte_code = ( int64_t* ) mmap( 0, spu->code_size, PROT_READ, MAP_SHARED, spu->byte_code_desc, 0 );
+
+
+    if ( spu->assembler_desc == -1 || spu->assembler == MAP_FAILED )
+    {
+        printlg(         "Failed to open <code/byte_code.txt> file in spu initialization\n" );
+        fprintf( stderr, "Failed to open <code/byte_code.txt> file in spu initialization\n" );
+        spu->status = Failure;
+        return Failure;
+    }
+
+    spu->PC = 0;
+    spu->status = Success;
+
+    return Success;
+}
+
+void
+SPUrun_exit( SPU* spu )
+{
+    assert( spu );
+
+    if ( spu->status != Success )
+        return;
+
+    munmap( spu->byte_code, spu->code_size );
+    close( spu->byte_code_desc );
+    stack_destr( &spu->stk );
+
+    spu->byte_code_desc = 0;
+    spu->code_size =      0;
+    spu->code_size =      0;
+    spu->status =   Success;
+    spu->PC =             0;
+
 }

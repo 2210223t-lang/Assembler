@@ -3,6 +3,7 @@
 #include <limits.h>
 
 #include "Stack/stack.h"
+#include "asm_uitility.h"
 
 
 /**
@@ -22,11 +23,9 @@ Terminal( int argc, char** argv, char input[ PATH_MAX ] );
 /**
  * @brief Starts calculation
  *
- * @param[ in ] stk - stack which will be used during calculating
- *
- * @param[ in ] input - name of file where from to read commands
+ * @param[ in ] spu - soft_processing unit data
  *
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-Start_Calc( stack* stk, int status );
+Start_Calc( SPU* spu );
