@@ -2,7 +2,7 @@
 
 #include <limits.h>
 
-#include "asm_uitility.h"
+#include "../processor/asm_uitility.h"
 
 /**
  * @brief Translates source code into byte code
@@ -14,4 +14,4 @@
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 SPU
-compile( const char filename[ PATH_MAX ], int mode );
+assemble( char filename[ PATH_MAX ] );

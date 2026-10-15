@@ -2,7 +2,7 @@
 
 #include <limits.h>
 
-#include "Stack/stack.h"
+#include "../Stack/stack.h"
 #include "asm_uitility.h"
 
 
@@ -14,10 +14,8 @@
  * @param[ in ] argv - std argv
  *
  * @param[ out ] input char[ PATH_MAX ] - name of input filestream
- *
- * @return Where from to take source code ( 1 - file, 0 - stdin )
  */
-int
+void
 Terminal( int argc, char** argv, char input[ PATH_MAX ] );
 
 /**

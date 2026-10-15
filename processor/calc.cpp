@@ -9,14 +9,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "Stack/utility/errors.h"
-#include "Stack/utility/log.h"
+#include "../Stack/utility/errors.h"
+#include "../Stack/utility/log.h"
 #include "commands.h"
-#include "Stack/utility/Utility.h"
+#include "../Stack/utility/Utility.h"
 #include "calc.h"
 
 
-int
+void
 Terminal( int argc, char** argv, char input[ PATH_MAX ] )
 {
     assert( argv );
@@ -27,7 +27,6 @@ Terminal( int argc, char** argv, char input[ PATH_MAX ] )
 
     int check = 0;
     bool keepgoing = true;
-    int stat = 0;
 
     while ( keepgoing && ( check = getopt_long_only( argc, argv, "io", long_options, NULL ) ) != -1 )
     {
@@ -36,7 +35,6 @@ Terminal( int argc, char** argv, char input[ PATH_MAX ] )
         {
             case 'i':
                 strcpy( input, optarg );
-                stat = 1;
                 break;
 
             case '?':
@@ -50,7 +48,6 @@ Terminal( int argc, char** argv, char input[ PATH_MAX ] )
     }
     if ( keepgoing )
         printlg( "Ended parsing command line\nInput filename - <%s>\n\n", input );
-    return stat;
 }
 
 void
@@ -100,14 +97,15 @@ Start_Calc( SPU* spu )
     SPUrun_init( spu );
 
     double temp = 0;
-    int64_t command = spu->byte_code[ spu->PC ];
+    int64_t command = spu->byte_code.virt_mem[ spu->PC ];
     int current_line = 0;
 
 
     while ( command != HLT )
     {
-        command = spu->byte_code[ spu->PC ];
-        print_byte_code( spu->byte_code, spu->code_size / sizeof( int64_t ), spu->PC );//< Log - output debugging function
+        command = spu->byte_code.virt_mem[ spu->PC ];
+        /// Log - output debugging function
+        print_byte_code( ( int64_t* ) spu->byte_code.virt_mem, spu->byte_code.size / sizeof( int64_t ), spu->PC );
 
         switch( command )
         {
@@ -118,7 +116,7 @@ Start_Calc( SPU* spu )
 
             case PUSH:
                 spu->PC++;
-                push( &spu->stk, spu->byte_code[ spu->PC ] );
+                push( &spu->stk, spu->byte_code.virt_mem[ spu->PC ] );
                 spu->PC++;
                 current_line++;
                 break;
@@ -172,7 +170,7 @@ Start_Calc( SPU* spu )
                 break;
 
             case JMP:
-                jmp( &( spu->PC ), spu->byte_code[ spu->PC + 1 ] );
+                jmp( &( spu->PC ), spu->byte_code.virt_mem[ spu->PC + 1 ] );
                 break;
 
             case SQR:

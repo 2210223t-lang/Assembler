@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Stack/stack.h"
+#include "../Stack/stack.h"
 
 
 /**

@@ -2,10 +2,10 @@
 #include <assert.h>
 #include <math.h>
 
-#include "Stack/config.h"
-#include "Stack/utility/errors.h"
-#include "Stack/utility/log.h"
-#include "Stack/stack.h"
+#include "../Stack/config.h"
+#include "../Stack/utility/errors.h"
+#include "../Stack/utility/log.h"
+#include "../Stack/stack.h"
 
 
 #define DEPTH 6

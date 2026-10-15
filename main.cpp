@@ -2,8 +2,8 @@
 
 #include "Stack/utility/log.h"
 #include "Stack/stack.h"
-#include "calc.h"
-#include "compiler.h"
+#include "processor/calc.h"
+#include "assembler/compiler.h"
 
 
 int
@@ -16,8 +16,8 @@ main( int argc, char** argv )
 
     char input[ PATH_MAX ] = "code/test.txt";
 
-    int mode = Terminal( argc, argv, input );
-    SPU spu = compile( input, mode );
+    Terminal( argc, argv, input );
+    SPU spu = assemble( input );
     Start_Calc( &spu );
 
     logger_close();
