@@ -44,11 +44,11 @@ labels
 struct
 stream
 {
-    size_t    size;
-    int       desc;
-    int comm_count;
-    char* virt_mem;
-    char*     name;
+    size_t           size;
+    int              desc;
+    int        comm_count;
+    char*        virt_mem;
+    char name[ PATH_MAX ];
 };
 
 struct

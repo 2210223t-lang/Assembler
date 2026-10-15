@@ -1,7 +1,6 @@
 #include <limits.h>
 
 #include "Stack/utility/log.h"
-#include "Stack/stack.h"
 #include "processor/calc.h"
 #include "assembler/compiler.h"
 

@@ -74,7 +74,7 @@ out( stack* stk )
     printlg( "---OUT instruction---\n\n" );
 
     double result = ( double ) stack_pop( stk ) / 1000;
-    printf( "%.3lf\n", result );
+    printf( "%lf\n", result );
     stack_push( stk, result * 1000 );
 
     printlg( "-----end of OUT-----\n\n" );

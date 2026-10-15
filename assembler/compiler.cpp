@@ -9,8 +9,8 @@
 
 #include "../Stack/utility/errors.h"
 #include "../Stack/utility/log.h"
-#include "../Stack/utility/colours.h"
 #include "../processor/asm_uitility.h"
+#include "../Stack/utility/Utility.h"
 #include "arguments.h"
 
 
@@ -96,15 +96,16 @@ assemble( char filename[ PATH_MAX ] )
             return { .status = Failure };
         }
 
-        comm = assembler.virt_mem + PC;
+        comm = assembler.virt_mem + offset;
 
         if ( !my_strcmp( comm, "PUSH" ) )
         {
              move_offset( &assembler, &PC, &offset );
-            // if ( mscan_double( assembler.virt_mem + offset, &value ) == Failure )
+            if ( mscan_double( assembler.virt_mem + offset, &value ) == Failure )
+                $RT
                 // spu.status = check_register( &spu );//TODO add registers
 
-            print_byn( ostream_list, spu.byte_code.desc, PUSH, value, assembler.virt_mem + spu.PC );
+            print_byn( ostream_list, spu.byte_code.desc, PUSH, value, assembler.virt_mem + offset );
         }
         else if ( !my_strcmp( comm, "ADD" ) )
             print_byn( ostream_list, spu.byte_code.desc,  ADD, 0, 0 );
@@ -124,7 +125,7 @@ assemble( char filename[ PATH_MAX ] )
             if ( jmp_parse( &assembler, offset, &lab, PC ) == ERROR )
                 unk_com( assembler.virt_mem + offset, &assembler, &PC );
         }
-        else if ( comm[ 1 ] == ':' )//TODO add labels init
+        else if ( comm[ 0 ] == ':' )//TODO add labels init
         {
 
 

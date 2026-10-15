@@ -12,7 +12,6 @@
 #include "../Stack/utility/errors.h"
 #include "../Stack/utility/log.h"
 #include "commands.h"
-#include "../Stack/utility/Utility.h"
 #include "calc.h"
 
 

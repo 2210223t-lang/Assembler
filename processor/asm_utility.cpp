@@ -8,7 +8,6 @@
 #include <string.h>
 
 #include "../Stack/utility//log.h"
-#include "../Stack/utility/Utility.h"
 #include "../Stack/utility/errors.h"
 #include "asm_uitility.h"
 
@@ -155,7 +154,9 @@ asm_open( char* name )
 {
     assert( name );
 
-    stream assembler = { .name = name };
+    stream assembler = {};
+
+    strcpy( assembler.name, name );
 
     assembler.desc = open( name, O_RDONLY );
     assembler.virt_mem = ( char* ) mmap( 0, Getsize( assembler.name ), PROT_READ, MAP_SHARED, assembler.desc, 0 );
