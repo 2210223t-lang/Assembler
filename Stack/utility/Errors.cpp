@@ -126,7 +126,7 @@ StkError IncorrectD( stack* stk, const char* filename, const char* function, con
     assert( filename );
     assert( function );
 
-    size_t byte_size = 2 + ( sizeof( stack_data ) * stk->capacity + sizeof( uint64_t ) - 1 ) / sizeof( uint64_t );
+    int64_t byte_size = 2 + ( sizeof( stack_data ) * stk->capacity + sizeof( uint64_t ) - 1 ) / sizeof( uint64_t );
 
     //< Checks if stk->data size equals real stored value
     bool condition = ( 8 * byte_size - malloc_size( stk->data ) < 8  &&

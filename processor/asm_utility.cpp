@@ -12,6 +12,7 @@
 #include "asm_uitility.h"
 
 
+
 uint64_t
 Getsize( const char* filename )
 {
@@ -21,6 +22,7 @@ Getsize( const char* filename )
 
     return a.st_size;
 }
+
 
 StkError
 mscan_double( char* text, double* variable )
@@ -51,6 +53,7 @@ mscan_double( char* text, double* variable )
     return status;
 }
 
+
 StkError
 mscan_long( char* text, int64_t* variable )
 {
@@ -69,6 +72,22 @@ mscan_long( char* text, int64_t* variable )
     return status;
 }
 
+
+void
+labels_exit( labels* lab )
+{
+    assert( lab );
+
+    lab->quantity = 0;
+
+    free( lab->pc     );
+    free( lab->jmp_pc );
+    free( lab->name   );
+    lab->capacity = 0;
+
+}
+
+
 StkError
 labels_init( labels* lab )
 {
@@ -76,10 +95,11 @@ labels_init( labels* lab )
 
     lab->capacity = 4;
     lab->quantity = 0;
-    lab->line = ( size_t* ) calloc( lab->capacity, sizeof( size_t ) );
-    lab->name = ( char** ) calloc( lab->capacity, sizeof( char* ) );
+    lab->pc =     ( int64_t* ) calloc( lab->capacity, sizeof( int64_t ) );
+    lab->name =   ( char**  ) calloc( lab->capacity, sizeof( char*  ) );
+    lab->jmp_pc = ( int64_t* ) calloc( lab->capacity, sizeof( int64_t ) );
 
-    if ( !lab->line || !lab->name )
+    if ( !lab->pc || !lab->name || !lab->jmp_pc )
     {
         fprintf( stderr, "Assembling failure: can't allocate labels variable.\n" );
         printlg( "Assembling failure: can't allocate labels variable.\n"
@@ -89,13 +109,14 @@ labels_init( labels* lab )
     return Success;
 }
 
-size_t
-calc_offset( stream* assembler, size_t* PC )
+
+int64_t
+calc_offset( stream* assembler, int64_t* PC )
 {
     assert( assembler );
     assert( PC );
 
-    size_t count = 0;
+    int64_t count = 0;
     int j = 0;
 
     for ( int i = 0; i < *PC; i++ )
@@ -109,10 +130,13 @@ calc_offset( stream* assembler, size_t* PC )
     return count;
 }
 
+
 void
-move_offset( stream* assembler, size_t* PC, size_t* offset )
+move_offset( stream* assembler, int64_t* offset, int64_t* line )
 {
     assert( assembler );
+    assert( offset );
+    assert( line );
 
     while ( assembler->virt_mem[ *offset ] != ' ' && assembler->virt_mem[ *offset ] != '\n' &&
             assembler->virt_mem[ *offset ] != '\0' )
@@ -121,11 +145,12 @@ move_offset( stream* assembler, size_t* PC, size_t* offset )
     while ( assembler->virt_mem[ *offset ] == ' ' || assembler->virt_mem[ *offset ] == '\n' )
     {
         if ( assembler->virt_mem[ *offset ] == '\n' )
-            ( *PC )++;
+            ( *line )++;
 
         ( *offset )++;
     }
 }
+
 
 int
 my_strcmp( const char* a, const char* b )
@@ -148,6 +173,7 @@ my_strcmp( const char* a, const char* b )
 
     return *a - *b;
 }
+
 
 stream
 asm_open( char* name )
@@ -202,6 +228,7 @@ spu_dump( SPU* spu )//TODO enhance dump
 
 }
 
+
 void
 my_printlg( char* var )
 {
@@ -210,6 +237,7 @@ my_printlg( char* var )
     while ( *var && *var != '\n' && *var != '\0' && *var != ' ' )
         printlg( "%c", *( var++ ) );
 }
+
 
 StkError
 SPUrun_init( SPU* spu )
@@ -241,6 +269,7 @@ SPUrun_init( SPU* spu )
     return Success;
 }
 
+
 void
 SPUrun_exit( SPU* spu )
 {
@@ -261,6 +290,7 @@ SPUrun_exit( SPU* spu )
 
 }
 
+
 StkError
 SPUasm_init( SPU* spu )
 {
@@ -279,4 +309,15 @@ SPUasm_init( SPU* spu )
 
     spu->status = Success;
     return Success;
+}
+
+
+void
+SPUasm_exit( SPU* spu )
+{
+    assert( spu );
+
+    munmap( spu->byte_code.virt_mem, spu->byte_code.size );
+    close( spu->byte_code.desc );
+
 }

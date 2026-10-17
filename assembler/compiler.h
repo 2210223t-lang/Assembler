@@ -4,6 +4,7 @@
 
 #include "../processor/asm_uitility.h"
 
+
 /**
  * @brief Translates source code into byte code
  *
@@ -15,3 +16,7 @@
  */
 SPU
 assemble( char filename[ PATH_MAX ] );
+
+
+void
+unk_com( char* comm, stream* assembler, int64_t* line );

@@ -1,14 +1,18 @@
+#include <cstddef>
+#include <cstdint>
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 
 #include "../Stack/config.h"
 #include "../Stack/utility/errors.h"
 #include "../Stack/utility/log.h"
 #include "../Stack/stack.h"
 
-
 #define DEPTH 6
+
+
 
 int
 factorial( int limit )
@@ -18,6 +22,7 @@ factorial( int limit )
         result *= i;
     return result;
 }
+
 
 int
 div( stack* stk )
@@ -35,6 +40,7 @@ div( stack* stk )
     return Success;
 }
 
+
 int
 mult( stack* stk )
 {
@@ -51,6 +57,7 @@ mult( stack* stk )
     return Success;
 }
 
+
 int
 sum( stack* stk )
 {
@@ -65,6 +72,7 @@ sum( stack* stk )
     printlg( "-----end of SUM-----\n\n" );
     return Success;
 }
+
 
 int
 out( stack* stk )
@@ -81,6 +89,7 @@ out( stack* stk )
     return Success;
 }
 
+
 int
 rest( stack* stk )
 {
@@ -94,6 +103,7 @@ rest( stack* stk )
     printlg( "-----end of REST-----\n\n" );
     return Success;
 }
+
 
 int
 sub( stack* stk )
@@ -111,6 +121,7 @@ sub( stack* stk )
     return Success;
 }
 
+
 int
 sqr( stack* stk )
 {
@@ -126,12 +137,13 @@ sqr( stack* stk )
         return Failure;
     }
 
-    uint64_t result = temp * temp * 1000;
+    uint64_t result = temp * temp;
     stack_push( stk, result * 1000 );
 
     printlg( "-----end of SQR-----\n\n" );
     return Success;
 }
+
 
 int
 fact( stack* stk )
@@ -158,6 +170,7 @@ fact( stack* stk )
     return Success;
 }
 
+
 int
 sinus( stack* stk )
 {
@@ -178,18 +191,20 @@ sinus( stack* stk )
     return Success;
 }
 
+
 int
-push( stack* stk, stack_data value )
+push( stack* stk, stack_data* value )
 {
     assert( stk );
 
     printlg( "---PUSH instruction---\n\n" );
 
-    stack_push( stk, value * 1000 );
+    stack_push( stk, ( *value ) * 1000 );
 
     printlg( "-----end of PUSH-----\n\n" );
     return Success;
 }
+
 
 int
 pop( stack* stk )
@@ -204,12 +219,14 @@ pop( stack* stk )
     return Success;
 }
 
+
 int
-jmp( size_t* PC, size_t value )
+jmp( size_t* PC, size_t* value )
 {
     assert( PC );
+    assert( value );
 
-    if ( value < 0 )
+    if ( *value < 0 )
     {
         printlg( "Incorrect jmp destination in line %zd\n", *PC );
         fprintf( stderr, "Incorrect jmp destination in line %zd\n", *PC );
@@ -218,7 +235,7 @@ jmp( size_t* PC, size_t value )
 
     printlg( "---| Jumping instruction |---\n\n" );
 
-    *PC = value;
+    memcpy( PC, value, sizeof( size_t ) );
 
     printlg( "\n-----------------------------\n\n" );
     return Success;

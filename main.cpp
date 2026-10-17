@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <string.h>
 
 #include "Stack/utility/log.h"
 #include "processor/calc.h"
@@ -13,7 +14,8 @@ main( int argc, char** argv )
     stack stk = {};
     stack_init( &stk, 4 );
 
-    char input[ PATH_MAX ] = "code/test.txt";
+    char input[ PATH_MAX ] = "";
+    strcpy( input, "code/test.txt" );
 
     Terminal( argc, argv, input );
     SPU spu = assemble( input );

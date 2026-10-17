@@ -31,20 +31,20 @@ reading_types
     INT64_T = 2,
 };
 
-
 struct
 labels
 {
-    char** name;
-    size_t* line;
-    int quantity;
+    int64_t* pc;
+    int64_t* jmp_pc;
     int capacity;
+    int quantity;
+    char** name;
 };
 
 struct
 stream
 {
-    size_t           size;
+    int64_t           size;
     int              desc;
     int        comm_count;
     char*        virt_mem;
@@ -55,12 +55,13 @@ struct
 SPU
 {
 
-    size_t         PC;
+    int64_t         PC;
     stack         stk;
     labels        lab;
     StkError   status;
     stream  byte_code;
 };
+
 
 uint64_t
 Getsize( const char* filename );
@@ -71,11 +72,11 @@ mscan_double( char* text, double* variable );
 stream
 asm_open( char* name );
 
-size_t
-calc_offset( stream* assembler, size_t* PC );
+int64_t
+calc_offset( stream* assembler, int64_t* PC );
 
 void
-move_offset( stream* assembler, size_t* PC, size_t* offset );
+move_offset( stream* assembler, int64_t* offset, int64_t* line );
 
 int
 my_strcmp( const char* a, const char* b );
@@ -100,3 +101,9 @@ mscan_long( char* text, int64_t* variable );
 
 StkError
 labels_init( labels* lab );
+
+void
+labels_exit( labels* lab );
+
+void
+SPUasm_exit( SPU* spu );

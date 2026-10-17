@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -13,6 +14,7 @@
 #include "../Stack/utility/log.h"
 #include "commands.h"
 #include "calc.h"
+
 
 
 void
@@ -49,15 +51,16 @@ Terminal( int argc, char** argv, char input[ PATH_MAX ] )
         printlg( "Ended parsing command line\nInput filename - <%s>\n\n", input );
 }
 
+
 void
-print_byte_code( int64_t* code, size_t size, size_t current_command )
+print_byte_code( char* code, int64_t size, int64_t current_command )
 {
     assert( code );
 
     printlg( "---| Code status |---\n\n" );
 
-    for ( int i = 0; i < size; i++ )
-        if ( code[ i ] == PUSH )
+    for ( int i = 0; i * 8 < size; i++ )
+        if ( ( int64_t ) code[ i * 8 ] == PUSH || ( int64_t ) code[ i * 8 ] == JMP )
         {
             printlg( " ____________ " );
             i++;
@@ -67,19 +70,20 @@ print_byte_code( int64_t* code, size_t size, size_t current_command )
 
     printlg( "\n" );
 
-    for ( int i = 0; i < size; i++ )
-        printlg( "[ %3lld ]", code[ i ] );
+    for ( int i = 0; i * 8 < size; i++ )
+        printlg( "[ %3lld ]", ( int64_t ) code[ i * 8 ] );
 
     printlg( "\n" );
 
     for ( int i = 0; i < size; i++ )
-        if ( i == current_command )
+        if ( i * 8 == current_command )
             printlg( "  ^^^  " );
         else
             printlg( "       " );
 
     printlg( "\n---------------------\n\n" );
 }
+
 
 int
 Start_Calc( SPU* spu )
@@ -96,15 +100,15 @@ Start_Calc( SPU* spu )
     SPUrun_init( spu );
 
     double temp = 0;
-    int64_t command = spu->byte_code.virt_mem[ spu->PC ];
-    int current_line = 0;
+    char* code = spu->byte_code.virt_mem;
+    int64_t command = 1;
 
 
     while ( command != HLT )
     {
-        command = spu->byte_code.virt_mem[ spu->PC ];
+        memcpy( &command, code + spu->PC, sizeof( int64_t ) );
         /// Log - output debugging function
-        print_byte_code( ( int64_t* ) spu->byte_code.virt_mem, spu->byte_code.size / sizeof( int64_t ), spu->PC );
+        print_byte_code( code, spu->byte_code.size, spu->PC );
 
         switch( command )
         {
@@ -114,71 +118,63 @@ Start_Calc( SPU* spu )
                 return Success;
 
             case PUSH:
-                spu->PC++;
-                push( &spu->stk, spu->byte_code.virt_mem[ spu->PC ] );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
+                push( &spu->stk, ( stack_data* ) ( code + spu->PC ) );
+                spu->PC += 8;
                 break;
 
             case POP:
                 pop( &spu->stk );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
                 break;
 
             case ADD:
                 sum( &spu->stk );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
                 break;
 
             case SUB:
                 sub( &spu->stk );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
                 break;
 
             case DIV:
                 div( &spu->stk );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
                 break;
 
             case OUT:
                 out( &spu->stk );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
                 break;
 
             case FACT:
                 fact( &spu->stk );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
                 break;
 
             case MULT:
                 mult( &spu->stk );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
                 break;
 
             case REST:
                 rest( &spu->stk );
-                spu->PC++;
-                current_line++;
+                spu->PC += 8;
                 break;
 
             case JMP:
-                jmp( &( spu->PC ), spu->byte_code.virt_mem[ spu->PC + 1 ] );
+                jmp( &( spu->PC ), ( int64_t* ) ( code + spu->PC + 8 ) );
                 break;
 
             case SQR:
                 sqr( &spu->stk );
+                spu->PC += 8;
                 break;
 
             default:
                 printlg(         "Processor failure: Unknown command\n"
-                                 "Command id: <%d> in line %d\n", command, current_line );
+                                 "Command id: <%d>, PC %d\n", command, spu->PC );
                 fprintf( stderr, "Processor failure: Unknown command\n" );
                 return Failure;
         }

@@ -64,8 +64,8 @@ sqr( stack* stk );
  *
  * @return Exit status ( Success if OK & Failure otherwise )
  */
- int
- fact( stack* stk );
+int
+fact( stack* stk );
 
 /**
  * @brief Pushes value into the stack
@@ -73,7 +73,7 @@ sqr( stack* stk );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-push( stack* stk, stack_data value );
+push( stack* stk, stack_data* value );
 
 /**
  * @brief Pops last value of the stack
@@ -98,4 +98,4 @@ sinus( stack* stk );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-jmp( size_t* PC, size_t value );
+jmp( int64_t* PC, int64_t* value );
