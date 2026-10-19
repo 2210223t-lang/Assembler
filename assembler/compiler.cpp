@@ -107,9 +107,16 @@ assemble( char filename[ PATH_MAX ] )
              PC += ARG_SIZE;
 
             comm = { .num = PUSH };
-            if ( mscan_double( assembler.virt_mem + offset, &value ) == Failure )
+            if ( *( assembler.virt_mem + offset ) == '[' )
+            {
+                comm.ram = true;
+                if ( mem_proceed( &assembler, &offset, line, ostream_list, spu.byte_code.desc ) == Failure )
+                    spu.status = Failure;
+            }
+            else if ( mscan_double( assembler.virt_mem + offset, &value ) == Failure )
             {
                 comm.reg = true;
+
                 value = get_register( assembler.virt_mem + offset, line );
                 if ( value == INCORRECT_REGISTER )
                     spu.status = Failure;

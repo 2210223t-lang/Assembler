@@ -204,3 +204,36 @@ get_register( char* assembler, size_t line )
         return INCORRECT_REGISTER;
     }
 }
+
+
+StkError
+mem_parse( stream* assembler, size_t* offset, size_t line, FILE* list, int desc )
+{
+    assert( assembler );
+    assert( offset );
+    assert( list );
+
+    int64_t con = 0;
+    int64_t coef = 0;
+    int reg = 0;
+    offset++;
+
+    if ( *( assembler->virt_mem + *offset ) != ' ' )
+        if ( mscan_long( assembler->virt_mem + *offset, &con ) == Failure )
+        {
+            reg = get_register( assembler->virt_mem + *offset, line );
+            if ( reg == INCORRECT_REGISTER )
+            {
+                printlg( "Assembling failure.\nIncorrect memory formula on line %zd.\n\n", line );
+                fprintf( stderr, "Assembling failure.\n\n" );
+                return Failure;
+            }
+//             else
+//             {
+//
+//
+//             }
+        }
+
+
+}

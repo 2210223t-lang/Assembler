@@ -34,6 +34,7 @@ void stack_push( stack* stk, stack_data temp );
  */
 stack_data stack_pop( stack* stk );
 
+
 /**
  * @brief Initializes extra data for debugging mode
  */

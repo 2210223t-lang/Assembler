@@ -17,6 +17,8 @@
 SPU
 assemble( char filename[ PATH_MAX ] );
 
-
+/**
+ * @brief Prints into log-file essential data about unknown command
+ */
 void
 unk_com( char* comm, stream* assembler, size_t* line );

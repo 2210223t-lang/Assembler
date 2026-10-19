@@ -11,7 +11,7 @@
 #include "../Stack/utility/errors.h"
 #include "asm_uitility.h"
 
-
+#define ASM_FARFETCH LONG_MAX
 
 uint64_t
 Getsize( const char* filename )
@@ -273,9 +273,11 @@ SPUrun_init( SPU* spu )
         return Failure;
     }
 
+    for ( int i = 0; i < MEMORY_CAPACITY * MEMORY_CAPACITY; i++ )
+        spu->memory[ i ] = ASM_FARFETCH;
+
     spu->PC = 0;
     spu->status = Success;
-
     return Success;
 }
 
@@ -344,4 +346,30 @@ check_register( char* assembler )
         assembler++;
 
     return ( *assembler != '\n' ) ? true : false;
+}
+
+
+void
+mem_dump ( SPU* spu )
+{
+    assert( spu );
+
+    printlg( "---| Memory status |---\n\n   " );
+
+    for ( int i = 0; i < MEMORY_CAPACITY; i++ )
+        printlg( "[%d]", i );
+    printlg( "\n" );
+
+    for ( int i = 0; i < MEMORY_CAPACITY; i++ )
+    {
+        printlg( "[%d]", i );
+        for ( int j = 0; j < MEMORY_CAPACITY; j++ )
+            if ( spu->memory[ i * 10 + j ] == ASM_FARFETCH )
+                printlg( "   " );
+            else
+                printlg( "<*>" );
+
+        printlg( "\n" );
+    }
+    printlg( "-----------------------\n\n" );
 }

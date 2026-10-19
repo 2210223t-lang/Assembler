@@ -3,6 +3,11 @@ cm.sh
 log
 TODO
 .vscode
-code
+code/square.txt
+code/test.txt
 draft.cpp
 .DS_Store
+badapple.raw
+doxyfile
+html
+latex
