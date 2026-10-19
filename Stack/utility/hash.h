@@ -6,4 +6,4 @@
 
 
 uint64_t Hash_Calc( stack* stk );
-uint64_t hash_djb2( unsigned char* str, int64_t size );
+uint64_t hash_djb2( unsigned char* str, size_t size );

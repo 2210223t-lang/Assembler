@@ -12,14 +12,17 @@ label_exit
 };
 
 #define  ARG_SIZE 8
-#define COMM_SIZE 8
+#define COMM_SIZE 1
 
 
 int64_t
-jmp_parse( stream* assembler, int64_t offset, labels* lab, int64_t line_stat, int64_t PC );
+jmp_parse( stream* assembler, size_t offset, labels* lab, size_t line_stat, size_t PC );
 
 StkError
-add_tag( int byte_code, char* tag, int64_t PC, labels* lab, int64_t line );
+add_tag( int byte_code, char* tag, size_t PC, labels* lab, size_t line );
 
 void
-jmp_proceed( FILE* ostream_list, SPU* spu, int64_t* PC, int64_t* offset, stream* assembler, int64_t* line, labels* lab  );
+jmp_proceed( FILE* ostream_list, SPU* spu, size_t* PC, size_t* offset, stream* assembler, size_t* line, labels* lab  );
+
+int64_t
+get_register( char* assembler, size_t line );

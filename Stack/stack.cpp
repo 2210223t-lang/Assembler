@@ -41,7 +41,7 @@ void StackIni( stack* stk,       int   capacity
     assert( !not_null( stk ) && !unforeseen_type( stk ) && !incorrect_dimensions( stk ) );
 
     stack backup = *stk;
-    int64_t byte_size = 2 + ( sizeof( stack_data ) * stk->capacity + sizeof( uint64_t ) - 1 ) / sizeof( uint64_t );
+    size_t byte_size = 2 + ( sizeof( stack_data ) * stk->capacity + sizeof( uint64_t ) - 1 ) / sizeof( uint64_t );
 
     stk->data = ( stack_data* ) calloc( byte_size, sizeof( uint64_t ) );
     stk->size = 1; /// Not 0, to leave space for canary
@@ -94,7 +94,7 @@ void stack_push( stack* stk, stack_data temp )
         *canopy = 0;
 
         stk->capacity *= 2;
-        int64_t byte_size = 2 + ( sizeof( stack_data ) * stk->capacity + sizeof( uint64_t ) - 1 ) / sizeof( uint64_t );
+        size_t byte_size = 2 + ( sizeof( stack_data ) * stk->capacity + sizeof( uint64_t ) - 1 ) / sizeof( uint64_t );
         stk->data = ( stack_data* ) realloc( stk->data, 8 * byte_size );
 
         assert ( !lack_of_memory( stk, &backup ) );
@@ -148,7 +148,7 @@ stack_data stack_pop( stack* stk )
     {
         stk->capacity /= 4;
 
-        int64_t byte_size = 2 + ( sizeof( stack_data ) * stk->capacity + sizeof( uint64_t ) - 1 ) / sizeof( uint64_t );
+        size_t byte_size = 2 + ( sizeof( stack_data ) * stk->capacity + sizeof( uint64_t ) - 1 ) / sizeof( uint64_t );
 
         stk->data = ( stack_data* ) realloc( stk->data, 8 * byte_size );
 

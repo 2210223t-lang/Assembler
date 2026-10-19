@@ -95,9 +95,9 @@ labels_init( labels* lab )
 
     lab->capacity = 4;
     lab->quantity = 0;
-    lab->pc =     ( int64_t* ) calloc( lab->capacity, sizeof( int64_t ) );
+    lab->pc =     ( size_t* ) calloc( lab->capacity, sizeof( size_t ) );
     lab->name =   ( char**  ) calloc( lab->capacity, sizeof( char*  ) );
-    lab->jmp_pc = ( int64_t* ) calloc( lab->capacity, sizeof( int64_t ) );
+    lab->jmp_pc = ( size_t* ) calloc( lab->capacity, sizeof( size_t ) );
 
     if ( !lab->pc || !lab->name || !lab->jmp_pc )
     {
@@ -110,13 +110,13 @@ labels_init( labels* lab )
 }
 
 
-int64_t
-calc_offset( stream* assembler, int64_t* PC )
+size_t
+calc_offset( stream* assembler, size_t* PC )
 {
     assert( assembler );
     assert( PC );
 
-    int64_t count = 0;
+    size_t count = 0;
     int j = 0;
 
     for ( int i = 0; i < *PC; i++ )
@@ -132,7 +132,7 @@ calc_offset( stream* assembler, int64_t* PC )
 
 
 void
-move_offset( stream* assembler, int64_t* offset, int64_t* line )
+move_offset( stream* assembler, size_t* offset, size_t* line )
 {
     assert( assembler );
     assert( offset );
@@ -254,6 +254,7 @@ SPUrun_init( SPU* spu )
     spu->byte_code.desc = open( "code/byte_code.txt", O_RDONLY );
     spu->byte_code.virt_mem = ( char* ) mmap( 0, spu->byte_code.size, PROT_READ, MAP_SHARED, spu->byte_code.desc, 0 );
 
+    stack_init( &spu->ret_val, 4 );
 
     if ( spu->byte_code.desc == -1 || spu->byte_code.virt_mem == MAP_FAILED )
     {
@@ -281,6 +282,7 @@ SPUrun_exit( SPU* spu )
     munmap( spu->byte_code.virt_mem, spu->byte_code.size );
     close( spu->byte_code.desc );
     stack_destr( &spu->stk );
+    stack_destr( &spu->ret_val );
 
     spu->byte_code.desc = 0;
     spu->byte_code.size = 0;
@@ -298,7 +300,7 @@ SPUasm_init( SPU* spu )
 
     strcpy( spu->byte_code.name, "code/byte_code.txt" );
 
-    spu->byte_code.desc = open( spu->byte_code.name, O_CREAT | O_WRONLY );
+    spu->byte_code.desc = open( spu->byte_code.name, O_CREAT | O_WRONLY | O_TRUNC, 0666 );
     spu->byte_code.size = Getsize( spu->byte_code.name );
 
     if ( spu->byte_code.desc == -1 )
@@ -319,5 +321,18 @@ SPUasm_exit( SPU* spu )
 
     munmap( spu->byte_code.virt_mem, spu->byte_code.size );
     close( spu->byte_code.desc );
+}
 
+
+bool
+check_register( char* assembler )
+{
+    assert( assembler );
+
+    while( *assembler != ' ' && *assembler != '\n' && *assembler )
+        assembler++;
+    while( *assembler == ' ' )
+        assembler++;
+
+    return ( *assembler != '\n' ) ? true : false;
 }

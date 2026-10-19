@@ -19,4 +19,4 @@ assemble( char filename[ PATH_MAX ] );
 
 
 void
-unk_com( char* comm, stream* assembler, int64_t* line );
+unk_com( char* comm, stream* assembler, size_t* line );

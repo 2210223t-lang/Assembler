@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <cstdint>
 #include <stdio.h>
 #include <assert.h>
@@ -9,6 +8,7 @@
 #include "../Stack/utility/errors.h"
 #include "../Stack/utility/log.h"
 #include "../Stack/stack.h"
+#include "asm_uitility.h"
 
 #define DEPTH 6
 
@@ -199,7 +199,7 @@ push( stack* stk, stack_data* value )
 
     printlg( "---PUSH instruction---\n\n" );
 
-    stack_push( stk, ( *value ) * 1000 );
+    stack_push( stk, ( *value ) );
 
     printlg( "-----end of PUSH-----\n\n" );
     return Success;
@@ -207,13 +207,16 @@ push( stack* stk, stack_data* value )
 
 
 int
-pop( stack* stk )
+pop( stack* stk, stack_data* storage )
 {
     assert( stk );
 
     printlg( "---POP instruction\n\n" );
 
-    stack_pop( stk );
+    stack_data temp = stack_pop( stk );
+
+    if ( storage )
+        *storage = temp;
 
     printlg( "-----end of POP-----\n\n" );
     return Success;
@@ -238,5 +241,37 @@ jmp( size_t* PC, size_t* value )
     memcpy( PC, value, sizeof( size_t ) );
 
     printlg( "\n-----------------------------\n\n" );
+    return Success;
+}
+
+
+int
+call ( SPU* spu, size_t dest )
+{
+    assert( spu );
+
+    printlg( "---| Call instruction |---\n\n" );
+
+    stack_push( &spu->ret_val, spu->PC );
+    jmp( &spu->PC, &dest );
+
+    printlg( "--------------------------\n\n" );
+
+    return Success;
+}
+
+
+int
+ret ( SPU* spu )
+{
+    assert( spu );
+
+    printlg( "---| Ret instruction |---\n\n" );
+
+    size_t temp = stack_pop( &spu->ret_val );
+    jmp( &spu->PC, &temp );
+
+    printlg( "-------------------------\n\n" );
+
     return Success;
 }

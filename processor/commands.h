@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Stack/stack.h"
+#include "asm_uitility.h"
 
 
 /**
@@ -81,7 +82,7 @@ push( stack* stk, stack_data* value );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-pop( stack* stk );
+pop( stack* stk, stack_data* storage );
 
 /**
  * @brief Finds sinus of last value in stack
@@ -98,4 +99,22 @@ sinus( stack* stk );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-jmp( int64_t* PC, int64_t* value );
+jmp( size_t* PC, size_t* value );
+
+
+/**
+ * @brief return to a dest
+ *
+ * @return Exit status ( Success if OK & Failure otherwise )
+ */
+int
+ret ( SPU* spu );
+
+
+/**
+ * @brief calls function
+ *
+ * @return Exit status ( Success if OK & Failure otherwise )
+ */
+int
+call ( SPU* spu, size_t dest );

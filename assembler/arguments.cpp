@@ -12,16 +12,17 @@
 #include "../Stack/utility/log.h"
 #include "../processor/asm_uitility.h"
 #include "arguments.h"
-#include "../Stack/utility/Utility.h"
 #include "compiler.h"
 
 
 
 StkError
-add_tag( int byte_code, char* tag, int64_t PC, labels* lab, int64_t line )
+add_tag( int byte_code, char* tag, size_t PC, labels* lab, size_t line )
 {
     assert( tag );
     assert( lab );
+
+    bool was_init = false;
 
     printlg( "---| Adding new tag <" );
     my_printlg( tag );
@@ -34,7 +35,7 @@ add_tag( int byte_code, char* tag, int64_t PC, labels* lab, int64_t line )
                      "Attempt to reinitialize label in line: %d\n", line );
             return Failure;
         }
-        else if ( lab->pc[ i ] == DONT_EXIST )
+        else if ( lab->pc[ i ] == DONT_EXIST && !my_strcmp( tag, lab->name[ i ] ) )
         {
             if ( lab->jmp_pc[ i ] < 0 )
             {
@@ -43,21 +44,22 @@ add_tag( int byte_code, char* tag, int64_t PC, labels* lab, int64_t line )
                 return Failure;
             }
             lab->pc[ i ] = PC;
+            was_init = true;
 
             pwrite( byte_code, &PC, sizeof( int64_t ), lab->jmp_pc[ i ] );
             printlg( "Tag initialized.\n"
                      "Detected jmp forward to this tag %d-->%d\n\n", lab->jmp_pc[ i ], lab->pc[ i ] );
-            return Success;
-
         }
+    if ( was_init )
+        return Success;
 
     if ( lab->capacity <= 1 + lab->quantity )
     {
         lab->capacity *= 2;
 
-        lab->pc   =   ( int64_t* ) realloc( lab->pc,     lab->capacity * sizeof( int64_t ) );
+        lab->pc   =   ( size_t* ) realloc( lab->pc,     lab->capacity * sizeof( size_t ) );
         lab->name =   (  char** ) realloc( lab->name,   lab->capacity * sizeof(  char* ) );
-        lab->jmp_pc = ( int64_t* ) realloc( lab->jmp_pc, lab->capacity * sizeof( int64_t ) );
+        lab->jmp_pc = ( size_t* ) realloc( lab->jmp_pc, lab->capacity * sizeof( size_t ) );
 
         if ( !lab->pc || !lab->name )
         {
@@ -80,7 +82,7 @@ add_tag( int byte_code, char* tag, int64_t PC, labels* lab, int64_t line )
 
 
 void
-jmp_proceed( FILE* ostream_list, SPU* spu, int64_t* PC, int64_t* offset, stream* assembler, int64_t* line, labels* lab  )
+jmp_proceed( FILE* ostream_list, SPU* spu, size_t* PC, size_t* offset, stream* assembler, size_t* line, labels* lab  )
 {
     assert( ostream_list );
     assert( spu );
@@ -100,7 +102,7 @@ jmp_proceed( FILE* ostream_list, SPU* spu, int64_t* PC, int64_t* offset, stream*
     else
     {
         if ( temp != DONT_EXIST )
-            printlg( "Jumping to byte %d\n\n", temp );
+            printlg( "Jumping %zd-->%zd\n\n", *PC, temp );
         write( spu->byte_code.desc, &temp, sizeof( int64_t ) );
         fprintf( ostream_list, "%lld", temp );
     }
@@ -108,7 +110,7 @@ jmp_proceed( FILE* ostream_list, SPU* spu, int64_t* PC, int64_t* offset, stream*
 
 
 int64_t
-jmp_parse( stream* assembler, int64_t offset, labels* lab, int64_t line_stat, int64_t PC )
+jmp_parse( stream* assembler, size_t offset, labels* lab, size_t line_stat, size_t PC )
 {
     assert( assembler );
 
@@ -142,15 +144,15 @@ jmp_parse( stream* assembler, int64_t offset, labels* lab, int64_t line_stat, in
     {
 
         for ( int i = 0; i < lab->quantity; i++ )
-            if ( !my_strcmp ( lab->name[ i ], flag ) )
+            if ( !my_strcmp ( lab->name[ i ], flag ) && lab->pc[ i ] != DONT_EXIST )
                 return lab->pc[ i ];
 
         if ( lab->quantity >= lab->capacity )
         {
             lab->capacity *= 2;
-            lab->pc =     ( int64_t* ) realloc( lab->pc,     lab->capacity * sizeof ( int64_t ) );
+            lab->pc =     ( size_t* ) realloc( lab->pc,     lab->capacity * sizeof ( size_t ) );
             lab->name =   ( char**  ) realloc( lab->name,   lab->capacity * sizeof (  char* ) );
-            lab->jmp_pc = ( int64_t* ) realloc( lab->jmp_pc, lab->capacity * sizeof ( int64_t ) );
+            lab->jmp_pc = ( size_t* ) realloc( lab->jmp_pc, lab->capacity * sizeof ( size_t ) );
 
             if ( !lab->pc || !lab->name || !lab->jmp_pc )
             {
@@ -168,4 +170,37 @@ jmp_parse( stream* assembler, int64_t offset, labels* lab, int64_t line_stat, in
     }
 
     return ERROR;
+}
+
+
+int64_t
+get_register( char* assembler, size_t line )
+{
+    assert( assembler );
+
+    if ( !my_strcmp( assembler, "RAX" ) )
+        return RAX;
+    else if ( !my_strcmp( assembler, "RBX" ) )
+        return RBX;
+    else if ( !my_strcmp( assembler, "RCX" ) )
+        return RCX;
+    else if ( !my_strcmp( assembler, "RDX" ) )
+        return RDX;
+    else if ( !my_strcmp( assembler, "RPI" ) )
+        return RSI;
+    else if ( !my_strcmp( assembler, "RDI" ) )
+        return RDI;
+    else if ( !my_strcmp( assembler, "RSP" ) )
+        return RSP;
+    else if ( !my_strcmp( assembler, "RBP" ) )
+        return RBP;
+    else if ( !my_strcmp( assembler, "RCP" ) )
+        return RCP;
+    else if ( !my_strcmp( assembler, "REX" ) )
+        return REX;
+    else
+    {
+        printlg( "Assembling failure. Incorrect register name in line %zd.\n\n", line );
+        return INCORRECT_REGISTER;
+    }
 }

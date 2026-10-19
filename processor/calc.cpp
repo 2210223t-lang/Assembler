@@ -14,6 +14,7 @@
 #include "../Stack/utility/log.h"
 #include "commands.h"
 #include "calc.h"
+#include "../assembler/arguments.h"
 
 
 
@@ -53,30 +54,39 @@ Terminal( int argc, char** argv, char input[ PATH_MAX ] )
 
 
 void
-print_byte_code( char* code, int64_t size, int64_t current_command )
+print_byte_code( instruct* code, size_t size, size_t current_command )
 {
     assert( code );
 
     printlg( "---| Code status |---\n\n" );
 
-    for ( int i = 0; i * 8 < size; i++ )
-        if ( ( int64_t ) code[ i * 8 ] == PUSH || ( int64_t ) code[ i * 8 ] == JMP )
+    printlg( "Size: %zd bytes\n"
+             "Current_command: %zd\n", size, current_command );
+
+    for ( int i = 0; i < size; i++ )
+        if ( code[ i ].num == PUSH || code[ i ].num == JMP )
         {
             printlg( " ____________ " );
-            i++;
+            i += ARG_SIZE;
         }
         else
             printlg( "       " );
 
     printlg( "\n" );
 
-    for ( int i = 0; i * 8 < size; i++ )
-        printlg( "[ %3lld ]", ( int64_t ) code[ i * 8 ] );
+    for ( int i = 0; i < size; i++ )
+        if ( code[ i ].num == PUSH || code[ i ].num == JMP )
+        {
+            printlg( "[ %3d ][ %3d ]", *( ( char* ) code + i ), *( int64_t* ) ( code + 1 + i ) );
+            i += ARG_SIZE;
+        }
+        else
+            printlg( "[ %3d ]", *( ( char* ) code + i ) );
 
     printlg( "\n" );
 
     for ( int i = 0; i < size; i++ )
-        if ( i * 8 == current_command )
+        if ( i == current_command )
             printlg( "  ^^^  " );
         else
             printlg( "       " );
@@ -100,17 +110,17 @@ Start_Calc( SPU* spu )
     SPUrun_init( spu );
 
     double temp = 0;
-    char* code = spu->byte_code.virt_mem;
-    int64_t command = 1;
+    instruct* code = ( instruct* )spu->byte_code.virt_mem;
+    instruct command = { .num = 1 };
 
 
-    while ( command != HLT )
+    while ( command.num != HLT )
     {
-        memcpy( &command, code + spu->PC, sizeof( int64_t ) );
+        memcpy( &command, code + spu->PC, COMM_SIZE );
         /// Log - output debugging function
         print_byte_code( code, spu->byte_code.size, spu->PC );
 
-        switch( command )
+        switch( command.num )
         {
             case HLT:
                 printlg(         "Killing process\n" );
@@ -118,58 +128,77 @@ Start_Calc( SPU* spu )
                 return Success;
 
             case PUSH:
-                spu->PC += 8;
-                push( &spu->stk, ( stack_data* ) ( code + spu->PC ) );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
+                if ( command.reg & 1 )
+                    push( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ) );
+                else
+                    push( &spu->stk, ( stack_data* ) ( code + spu->PC ) );
+                spu->PC += ARG_SIZE;
                 break;
 
             case POP:
-                pop( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
+                if ( command.reg & 1 )
+                {
+                    pop( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ) );
+                    spu->PC += ARG_SIZE;
+                }
+                else
+                    pop( &spu->stk, 0 );
                 break;
 
             case ADD:
                 sum( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
                 break;
 
             case SUB:
                 sub( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
                 break;
 
             case DIV:
                 div( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
                 break;
 
             case OUT:
                 out( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
                 break;
 
             case FACT:
                 fact( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
                 break;
 
             case MULT:
                 mult( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
                 break;
 
             case REST:
                 rest( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
                 break;
 
             case JMP:
-                jmp( &( spu->PC ), ( int64_t* ) ( code + spu->PC + 8 ) );
+                jmp( &( spu->PC ), ( size_t* ) ( code + spu->PC + 1 ) );
                 break;
 
             case SQR:
                 sqr( &spu->stk );
-                spu->PC += 8;
+                spu->PC += COMM_SIZE;
+                break;
+
+            case CALL:
+                spu->PC += COMM_SIZE;
+                spu->PC += ARG_SIZE;
+                call( spu, *( ( size_t* ) ( code + spu->PC - ARG_SIZE ) ) );
+                break;
+
+            case RET:
+                ret( spu );
                 break;
 
             default:
