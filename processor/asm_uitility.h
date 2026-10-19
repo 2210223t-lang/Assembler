@@ -12,21 +12,24 @@
 
 enum codes
 {
+    SQRT = -2,
+    JMPN = -1,
     HLT  =  0,
-    PUSH  = 1,
+    PUSH =  1,
     ADD  =  2,
     DIV  =  3,
     OUT  =  4,
     POP  =  5,
     SUB  =  6,
-    FACT  = 7,
-    MULT  = 8,
-    REST  = 9,
+    FACT =  7,
+    MULT =  8,
+    REST =  9,
     JMP  = 10,
     SQR  = 11,
     CALL = 12,
-    RET =  13,
+    RET  = 13,
     JMPP = 14,
+    JMPZ = 15,
 };
 
 enum registers
@@ -90,6 +93,7 @@ SPU
     stream               byte_code;
     stack_data registers[ REG_AM ];
     stack                  ret_val;
+    short           past_proc_sign;
 };
 
 

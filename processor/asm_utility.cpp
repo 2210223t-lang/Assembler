@@ -30,6 +30,13 @@ mscan_double( char* text, double* variable )
     assert( variable );
 
     StkError status = Failure;
+    short sign = 1;
+
+    if ( *text == '-' )
+    {
+        text++;
+        sign = -1;
+    }
 
     *variable = 0;
 
@@ -49,6 +56,8 @@ mscan_double( char* text, double* variable )
             ten_pow *= 10;
             status = Success;
         }
+
+    *variable *= sign;
 
     return status;
 }

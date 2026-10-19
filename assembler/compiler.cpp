@@ -90,7 +90,7 @@ assemble( char filename[ PATH_MAX ] )
 
     printlg( "---| Starting compilation |---\n\n" );
 
-    while ( my_strcmp( comm_point, "HLT" ) )
+    while ( *comm_point && offset < assembler.size )
     {
         if ( offset >= assembler.size )
         {
@@ -147,9 +147,11 @@ assemble( char filename[ PATH_MAX ] )
             comm = { .num = SQR };
             print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
         }
-        else if ( !my_strcmp( comm_point, "JMP" ) )
+        else if ( ( !my_strcmp( comm_point,  "JMP" ) && ( comm = { .num =  JMP } ).num ==  JMP ) ||
+                  ( !my_strcmp( comm_point, "JMPP" ) && ( comm = { .num = JMPP } ).num == JMPP ) ||
+                  ( !my_strcmp( comm_point, "JMPN" ) && ( comm = { .num = JMPN } ).num == JMPN ) ||
+                  ( !my_strcmp( comm_point, "JMPZ" ) && ( comm = { .num = JMPZ } ).num == JMPZ ) )
         {
-            comm = { .num = JMP };
             PC += ARG_SIZE;
             print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
             move_offset( &assembler, &offset, &line );
@@ -160,15 +162,6 @@ assemble( char filename[ PATH_MAX ] )
             comm = { .num = RET };
             print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
         }
-        else if ( !my_strcmp( comm_point, "JMPP" ) )
-        {
-            comm = { .num = JMPP };
-            PC += ARG_SIZE;
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
-            move_offset( &assembler, &offset, &line );
-            jmp_proceed( ostream_list, &spu, &PC, &offset, &assembler, &line, &lab );
-
-        }
         else if ( !my_strcmp( comm_point, "CALL" ) )
         {
             comm = { .num = CALL };
@@ -176,6 +169,16 @@ assemble( char filename[ PATH_MAX ] )
             print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
             move_offset( &assembler, &offset, &line );
             jmp_proceed( ostream_list, &spu, &PC, &offset, &assembler, &line, &lab );
+        }
+        else if ( !my_strcmp( comm_point, "SQRT" ) )
+        {
+            comm = { .num = SQRT };
+            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+        }
+        else if ( !my_strcmp( comm_point, "SUB" ) )
+        {
+            comm = { .num = SUB };
+            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
         }
         else if ( !my_strcmp( comm_point, "POP" ) )
         {
@@ -207,12 +210,21 @@ assemble( char filename[ PATH_MAX ] )
         move_offset( &assembler, &offset, &line ); //Moves position to the next argument
     }
 
+    for ( int i = 0; i < spu.lab.quantity; i++ )
+        if ( spu.lab.pc[ i ] == DONT_EXIST )
+        {
+            printlg( "Assembling failure, label value unresolved.\n"
+                     "Label <");
+            my_printlg( spu.lab.name[ i ] );
+            printlg( ">, defined pc %d\n\n", spu.lab.jmp_pc[ i ] );
+            spu.status = Failure;
+        }
+
     if ( spu.status != Success )
         fprintf( stderr, "Compiling failure, check log - file\n" );
     printlg( "---| End of compilation|---\n\n" );
 
     SPUasm_exit( &spu );
     labels_exit( &lab );
-
     return spu;
 }

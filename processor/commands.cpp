@@ -25,16 +25,24 @@ factorial( int limit )
 
 
 int
-div( stack* stk )
+div( stack* stk, short* past_proc_sign )
 {
     assert( stk );
+    assert( past_proc_sign );
 
     printlg( "---DIV instruction---\n\n" );
 
     double temp1 = ( double ) stack_pop( stk ) / 1000;
     double temp2 = ( double ) stack_pop( stk ) / 1000;
-    uint64_t result = ( temp2 / temp1 );
+    int64_t result = ( temp2 / temp1 );
     stack_push( stk, result * 1000 );
+
+    if ( result > 0 )
+        *past_proc_sign = 1;
+    else if ( result == 0 )
+        *past_proc_sign = 0;
+    else
+        *past_proc_sign = -1;
 
     printlg( "-----end of DIV-----\n\n" );
     return Success;
@@ -42,16 +50,24 @@ div( stack* stk )
 
 
 int
-mult( stack* stk )
+mult( stack* stk, short* past_proc_sign )
 {
     assert( stk );
+    assert( past_proc_sign );
 
     printlg( "---MULT instruction---\n\n" );
 
     double temp1 = ( double ) stack_pop( stk ) / 1000;
     double temp2 = ( double ) stack_pop( stk ) / 1000;
-    uint64_t result = temp1 * temp2;
+    int64_t result = temp1 * temp2;
     stack_push( stk, result * 1000 );
+
+    if ( result > 0 )
+        *past_proc_sign = 1;
+    else if ( result == 0 )
+        *past_proc_sign = 0;
+    else
+        *past_proc_sign = -1;
 
     printlg( "-----end of MULT-----\n\n" );
     return Success;
@@ -59,15 +75,23 @@ mult( stack* stk )
 
 
 int
-sum( stack* stk )
+sum( stack* stk, short* past_proc_sign )
 {
     assert( stk );
+    assert( past_proc_sign );
 
     printlg( "---SUM instruction---\n\n" );
 
-    uint64_t temp1 = stack_pop( stk );
-    uint64_t temp2 = stack_pop( stk );
-    stack_push( stk , temp1 + temp2 );
+    int64_t result = stack_pop( stk ) + stack_pop( stk );
+
+    stack_push( stk , result );
+
+    if ( result > 0 )
+        *past_proc_sign = 1;
+    else if ( result == 0 )
+        *past_proc_sign = 0;
+    else
+        *past_proc_sign = -1;
 
     printlg( "-----end of SUM-----\n\n" );
     return Success;
@@ -106,9 +130,10 @@ rest( stack* stk )
 
 
 int
-sub( stack* stk )
+sub( stack* stk, short* past_proc_sign )
 {
     assert( stk );
+    assert( past_proc_sign );
 
     printlg( "---SUB instruction---\n\n" );
 
@@ -117,15 +142,23 @@ sub( stack* stk )
     uint64_t result = ( temp2 - temp1 );
     stack_push( stk, result );
 
+    if ( result > 0 )
+        *past_proc_sign = 1;
+    else if ( result == 0 )
+        *past_proc_sign = 0;
+    else
+        *past_proc_sign = -1;
+
     printlg( "-----end of SUB-----\n\n" );
     return Success;
 }
 
 
 int
-sqr( stack* stk )
+sqr( stack* stk, short* past_proc_sign )
 {
     assert( stk );
+    assert( past_proc_sign );
 
     printlg( "---SQR instruction---\n\n" );
 
@@ -138,6 +171,12 @@ sqr( stack* stk )
     }
 
     uint64_t result = temp * temp;
+
+    if ( result == 0 )
+        *past_proc_sign = 0;
+    else
+        *past_proc_sign = 1;
+
     stack_push( stk, result * 1000 );
 
     printlg( "-----end of SQR-----\n\n" );
@@ -172,9 +211,10 @@ fact( stack* stk )
 
 
 int
-sinus( stack* stk )
+sinus( stack* stk, short* past_proc_sign )
 {
     assert( stk );
+    assert( past_proc_sign );
 
     printlg( "---SINUS instruction---\n\n" );
 
@@ -185,6 +225,13 @@ sinus( stack* stk )
     for ( int i = 0; i < DEPTH; i++ )
         result += pow( -1, i ) * pow( temp, 2 * i + 1 ) / factorial( 2 * i + 1 );
 
+    if ( result > 0 )
+        *past_proc_sign = 1;
+    else if ( result == 0 )
+        *past_proc_sign = 0;
+    else
+        *past_proc_sign = -1;
+
     stack_push( stk, result * 1000 );
 
     printlg( "-----end of SINUS-----\n\n" );
@@ -193,13 +240,21 @@ sinus( stack* stk )
 
 
 int
-push( stack* stk, stack_data* value )
+push( stack* stk, stack_data* value, short* past_proc_sign  )
 {
     assert( stk );
+    assert( value );
+
 
     printlg( "---PUSH instruction---\n\n" );
 
     stack_push( stk, ( *value ) );
+    if ( *value > 0 )
+        *past_proc_sign = 1;
+    else if ( *value == 0 )
+        *past_proc_sign = 0;
+    else
+        *past_proc_sign = -1;
 
     printlg( "-----end of PUSH-----\n\n" );
     return Success;
@@ -272,6 +327,40 @@ ret ( SPU* spu )
     jmp( &spu->PC, &temp );
 
     printlg( "-------------------------\n\n" );
+
+    return Success;
+}
+
+
+int
+root ( SPU* spu )
+{
+    assert( spu );
+
+    printlg( "---| Root instruction |---\n\n" );
+
+    double result = ( double ) stack_pop( &spu->stk ) / 1000;
+
+    if ( result < 0 )
+    {
+        printlg( "Processing failure.\n"
+                 "Attempt to calculate negative root. PC = %zd\n\n", spu->PC );
+        fprintf( stderr, "Processing failure.\n\n" );
+        return Failure;
+    }
+
+    result = sqrt( result ) * 1000;
+
+    stack_push( &spu->stk, result );
+
+    if ( result > 0 )
+        spu->past_proc_sign = 1;
+    else if ( result == 0 )
+        spu->past_proc_sign = 0;
+    else
+        spu->past_proc_sign = -1;
+
+    printlg( "---| End of root instruction |---\n\n" );
 
     return Success;
 }

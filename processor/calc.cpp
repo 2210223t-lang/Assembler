@@ -70,18 +70,18 @@ print_byte_code( instruct* code, size_t size, size_t current_command )
             i += ARG_SIZE;
         }
         else
-            printlg( "       " );
+            printlg( "      " );
 
     printlg( "\n" );
 
     for ( int i = 0; i < size; i++ )
         if ( code[ i ].num == PUSH || code[ i ].num == JMP )
         {
-            printlg( "[ %3d ][ %3d ]", *( ( char* ) code + i ), *( int64_t* ) ( code + 1 + i ) );
+            printlg( "[ %2d ][ %4d ]", *( ( char* ) code + i ), *( int64_t* ) ( code + 1 + i ) );
             i += ARG_SIZE;
         }
         else
-            printlg( "[ %3d ]", *( ( char* ) code + i ) );
+            printlg( "[ %2d ]", *( ( char* ) code + i ) );
 
     printlg( "\n" );
 
@@ -130,9 +130,9 @@ Start_Calc( SPU* spu )
             case PUSH:
                 spu->PC += COMM_SIZE;
                 if ( command.reg & 1 )
-                    push( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ) );
+                    push( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ), &spu->past_proc_sign );
                 else
-                    push( &spu->stk, ( stack_data* ) ( code + spu->PC ) );
+                    push( &spu->stk, ( stack_data* ) ( code + spu->PC ), &spu->past_proc_sign );
                 spu->PC += ARG_SIZE;
                 break;
 
@@ -148,17 +148,17 @@ Start_Calc( SPU* spu )
                 break;
 
             case ADD:
-                sum( &spu->stk );
+                sum( &spu->stk, &spu->past_proc_sign );
                 spu->PC += COMM_SIZE;
                 break;
 
             case SUB:
-                sub( &spu->stk );
+                sub( &spu->stk, &spu->past_proc_sign );
                 spu->PC += COMM_SIZE;
                 break;
 
             case DIV:
-                div( &spu->stk );
+                div( &spu->stk, &spu->past_proc_sign );
                 spu->PC += COMM_SIZE;
                 break;
 
@@ -173,7 +173,7 @@ Start_Calc( SPU* spu )
                 break;
 
             case MULT:
-                mult( &spu->stk );
+                mult( &spu->stk, &spu->past_proc_sign );
                 spu->PC += COMM_SIZE;
                 break;
 
@@ -187,7 +187,7 @@ Start_Calc( SPU* spu )
                 break;
 
             case SQR:
-                sqr( &spu->stk );
+                sqr( &spu->stk, &spu->past_proc_sign );
                 spu->PC += COMM_SIZE;
                 break;
 
@@ -199,6 +199,32 @@ Start_Calc( SPU* spu )
 
             case RET:
                 ret( spu );
+                break;
+
+            case SQRT:
+                root( spu );
+                spu->PC += COMM_SIZE;
+                break;
+
+            case JMPN:
+                if ( spu->past_proc_sign == -1 )
+                    jmp( &spu->PC, ( size_t* ) ( code + spu->PC + 1 ) );
+                else
+                    spu->PC += COMM_SIZE + ARG_SIZE;
+                break;
+
+            case JMPP:
+                if ( spu->past_proc_sign == 1 )
+                    jmp( &spu->PC, ( size_t* ) ( code + spu->PC + 1 ) );
+                else
+                    spu->PC += COMM_SIZE + ARG_SIZE;
+                break;
+
+            case JMPZ:
+                if ( spu->past_proc_sign == 0 )
+                    jmp( &spu->PC, ( size_t* ) ( code + spu->PC + 1 ) );
+                else
+                    spu->PC += COMM_SIZE + ARG_SIZE;
                 break;
 
             default:
