@@ -45,4 +45,4 @@ get_register( char* assembler, size_t line );
  * @brief Parses argument line as memory equation
  */
 StkError
-mem_parse( stream* assembler, size_t* offset, size_t line, FILE* list, int desc );
+mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, int desc, instruct* com, size_t* PC );

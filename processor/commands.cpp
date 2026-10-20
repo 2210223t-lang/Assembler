@@ -266,7 +266,7 @@ pop( stack* stk, stack_data* storage )
 {
     assert( stk );
 
-    printlg( "---POP instruction\n\n" );
+    printlg( "---| POP instruction |---\n\n" );
 
     stack_data temp = stack_pop( stk );
 

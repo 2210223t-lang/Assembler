@@ -207,33 +207,114 @@ get_register( char* assembler, size_t line )
 
 
 StkError
-mem_parse( stream* assembler, size_t* offset, size_t line, FILE* list, int desc )
+mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, int desc, instruct* com, size_t* PC )
 {
     assert( assembler );
     assert( offset );
     assert( list );
+    assert( PC );
 
     int64_t con = 0;
     int64_t coef = 0;
-    int reg = 0;
-    offset++;
+    int64_t reg = 0;
+    size_t line_b = line;
 
-    if ( *( assembler->virt_mem + *offset ) != ' ' )
-        if ( mscan_long( assembler->virt_mem + *offset, &con ) == Failure )
+    move_offset( assembler, offset, &line );
+
+    if ( line > line_b )
+    {
+        printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
+        return Failure;
+    }
+
+        if ( assembler->virt_mem[ *offset ] == 'R' )
         {
             reg = get_register( assembler->virt_mem + *offset, line );
             if ( reg == INCORRECT_REGISTER )
             {
-                printlg( "Assembling failure.\nIncorrect memory formula on line %zd.\n\n", line );
+                printlg( "Assembling failure.\nIncorrect memory formula on line %zd.\n( Unknown register )\n\n", line );
                 fprintf( stderr, "Assembling failure.\n\n" );
                 return Failure;
             }
-//             else
-//             {
-//
-//
-//             }
+            *PC += 2 * ARG_SIZE;
+            com->reg = true;
+
+            move_offset( assembler, offset, &line );
+            if ( line > line_b )
+            {
+                printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
+                return Failure;
+            }
+            if ( assembler->virt_mem[ *offset ] == '*'  )
+            {
+                move_offset( assembler, offset, &line );
+                if ( line > line_b || mscan_long( assembler->virt_mem + *offset, &coef ) == Failure )
+                {
+                    printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
+                    return Failure;
+                }
+                move_offset( assembler, offset, &line );
+                if ( line > line_b )
+                {
+                    printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
+                    return Failure;
+                }
+                if ( assembler->virt_mem[ *offset ] == '+' )
+                    move_offset( assembler, offset, &line );
+            }
+            else if ( assembler->virt_mem[ *offset ] == '+' )
+            {
+                coef = 1;
+                move_offset( assembler, offset, &line );
+                if ( line > line_b )
+                {
+                    printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
+                    return Failure;
+                }
+            }
+            else
+            {
+                printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
+                return Failure;
+            }
         }
 
+    if ( mscan_long( assembler->virt_mem + *offset, &con ) == Failure )
+    {
+        printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
+        return Failure;
+    }
+    else
+    {
+        com->con = true;
+        *PC += ARG_SIZE;
+    }
+    move_offset( assembler, offset, &line );
+    if ( line > line_b || assembler->virt_mem[ *offset ] != ']' )
+    {
+        printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
+        return Failure;
+    }
 
+    write( desc, com, sizeof( instruct ) );
+    fprintf( list, "%d", *( char* ) com );
+
+    if ( com->ram & 1 )
+    {
+        if ( com->reg & 1 )
+        {
+            write( desc,  &reg, sizeof( stack_data ) );
+            write( desc, &coef, sizeof( stack_data ) );
+            fprintf( list, " %lld * %lld", reg, coef );
+        }
+
+        if ( com->con & 1 )
+        {
+            write( desc, &con, sizeof( stack_data ) );
+            fprintf( list, " %lld", con );
+        }
+    }
+    fprintf( list, "\n" );
+
+    return Success;
 }

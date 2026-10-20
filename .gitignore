@@ -5,9 +5,11 @@ TODO
 .vscode
 code/square.txt
 code/test.txt
+code/fact.txt
 draft.cpp
 .DS_Store
 badapple.raw
 doxyfile
 html
 latex
+interp.cpp

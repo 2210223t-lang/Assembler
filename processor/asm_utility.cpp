@@ -336,7 +336,7 @@ SPUasm_exit( SPU* spu )
 
 
 bool
-check_register( char* assembler )
+check_arg ( char* assembler )
 {
     assert( assembler );
 

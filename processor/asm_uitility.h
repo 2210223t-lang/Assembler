@@ -165,25 +165,25 @@ spu_dump( SPU* spu );
  * @brief Prints var into log-file till the '\0' or space
  */
 void
-my_printlg( char* var );
+my_printlg ( char* var );
 
 /**
  * @brief Clean spu for processor exit
  */
 void
-SPUrun_exit( SPU* spu );
+SPUrun_exit ( SPU* spu );
 
 /**
  * @brief Initializes spu for processor start
  */
 StkError
-SPUrun_init( SPU* spu );
+SPUrun_init ( SPU* spu );
 
 /**
  * @brief Initializes spu for assembler
  */
 StkError
-SPUasm_init( SPU* spu );
+SPUasm_init ( SPU* spu );
 
 /**
  * @brief Scans text string for long long variable
@@ -193,28 +193,34 @@ SPUasm_init( SPU* spu );
  * @return Exit status
  */
 StkError
-mscan_long( char* text, int64_t* variable );
+mscan_long ( char* text, int64_t* variable );
 
 /**
  * @brief Labels initializer
  */
 StkError
-labels_init( labels* lab );
+labels_init ( labels* lab );
 
 /**
  * @brief Labels cleaner
  */
 void
-labels_exit( labels* lab );
+labels_exit ( labels* lab );
 
 /**
  * @brief Cleans spu struct for assembler exit
  */
 void
-SPUasm_exit( SPU* spu );
+SPUasm_exit ( SPU* spu );
 
 /**
  * @brief Checks whether char* argument is a register or not
  */
 bool
-check_register( char* assembler );
+check_arg ( char* assembler );
+
+/**
+ * @brief Dumps current RAM status into log-file
+ */
+void
+mem_dump ( SPU* spu );

@@ -12,6 +12,7 @@
 
 #include "../Stack/utility/errors.h"
 #include "../Stack/utility/log.h"
+#include "asm_uitility.h"
 #include "commands.h"
 #include "calc.h"
 #include "../assembler/arguments.h"
@@ -109,7 +110,8 @@ Start_Calc( SPU* spu )
 
     SPUrun_init( spu );
 
-    double temp = 0;
+    int64_t arg1 = 0;
+    int64_t arg2 = 0;
     instruct* code = ( instruct* )spu->byte_code.virt_mem;
     instruct command = { .num = 1 };
 
@@ -129,16 +131,80 @@ Start_Calc( SPU* spu )
 
             case PUSH:
                 spu->PC += COMM_SIZE;
-                if ( command.reg & 1 )
+                arg1 = 0;
+                arg2 = 0;
+                if ( command.ram & 1 )
+                {
+                    if ( command.reg & 1 )
+                    {
+                        memcpy( &arg1, code + spu->PC, ARG_SIZE );
+                        spu->PC += ARG_SIZE;
+                        arg1 = spu->registers[ arg1 ];
+                        memcpy( &arg2, code + spu->PC, ARG_SIZE );
+                        spu->PC += ARG_SIZE;
+                        arg1 *= arg2;
+                    }
+                    if ( command.con & 1 )
+                    {
+                        memcpy( &arg2, code + spu->PC, ARG_SIZE );
+                        arg1 += arg2;
+                        spu->PC += ARG_SIZE;
+                        }
+                    if ( arg1 > 0 && arg1 < MEMORY_CAPACITY * MEMORY_CAPACITY )
+                        push( &spu->stk, spu->memory + arg1, &spu->past_proc_sign );
+                    else
+                    {
+                        printlg( "Memory overflow.\n"
+                                "Attempt to allocate element with adress %uld\n\n", arg1 );
+                        return Failure;
+                    }
+                    mem_dump( spu );
+                }
+                else if ( command.reg & 1 )
+                {
                     push( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ), &spu->past_proc_sign );
+                    spu->PC += ARG_SIZE;
+                }
                 else
+                {
                     push( &spu->stk, ( stack_data* ) ( code + spu->PC ), &spu->past_proc_sign );
-                spu->PC += ARG_SIZE;
+                    spu->PC += ARG_SIZE;
+                }
                 break;
 
             case POP:
                 spu->PC += COMM_SIZE;
-                if ( command.reg & 1 )
+                arg1 = 0;
+                arg2 = 0;
+
+                if ( command.ram & 1 )
+                {
+                    if ( command.reg & 1 )
+                    {
+                        memcpy( &arg1, code + spu->PC, ARG_SIZE );
+                        spu->PC += ARG_SIZE;
+                        arg1 = spu->registers[ arg1 ];
+                        memcpy( &arg2, code + spu->PC, ARG_SIZE );
+                        spu->PC += ARG_SIZE;
+                        arg1 *= arg2;
+                    }
+                    if ( command.con & 1 )
+                    {
+                        memcpy( &arg2, code + spu->PC, ARG_SIZE );
+                        arg1 += arg2;
+                        spu->PC += ARG_SIZE;
+                    }
+                    if ( arg1 > 0 && arg1 < MEMORY_CAPACITY * MEMORY_CAPACITY )
+                        pop( &spu->stk, spu->memory + arg1  );
+                    else
+                    {
+                        printlg( "Memory overflow.\n"
+                                "Attempt to allocate element with adress %uld\n\n", arg1 );
+                        return Failure;
+                    }
+                    mem_dump( spu );
+                }
+                else if ( command.reg & 1 )
                 {
                     pop( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ) );
                     spu->PC += ARG_SIZE;

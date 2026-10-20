@@ -36,7 +36,7 @@ print_byn( FILE* list, int byte_code_desc, instruct* command, double value, char
     int64_t valuei = 0;
 
     write( byte_code_desc, command, sizeof ( instruct ) );
-    fprintf( list, "%d ",  *( char* ) comm );
+    fprintf( list, "%d ",  *( unsigned char* ) comm );
 
     if ( ( comm->num == PUSH || comm->num == POP ) && comm->reg & 1 )
     {
@@ -104,25 +104,30 @@ assemble( char filename[ PATH_MAX ] )
         if ( !my_strcmp( comm_point, "PUSH" ) )
         {
              move_offset( &assembler, &offset, &line );
-             PC += ARG_SIZE;
 
             comm = { .num = PUSH };
             if ( *( assembler.virt_mem + offset ) == '[' )
             {
                 comm.ram = true;
-                if ( mem_proceed( &assembler, &offset, line, ostream_list, spu.byte_code.desc ) == Failure )
+                if ( mem_proceed( &assembler, &offset, line, ostream_list, spu.byte_code.desc, &comm, &PC ) == Failure )
                     spu.status = Failure;
             }
-            else if ( mscan_double( assembler.virt_mem + offset, &value ) == Failure )
+            else if ( mscan_double( assembler.virt_mem + offset, &value ) == Success )
+            {
+                comm.con = true;
+                PC += ARG_SIZE;
+                print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
+            }
+            else
             {
                 comm.reg = true;
-
                 value = get_register( assembler.virt_mem + offset, line );
                 if ( value == INCORRECT_REGISTER )
                     spu.status = Failure;
+                print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
+                PC += ARG_SIZE;
             }
 
-            print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
         }
         else if ( !my_strcmp( comm_point, "ADD" ) )
         {
@@ -190,16 +195,30 @@ assemble( char filename[ PATH_MAX ] )
         else if ( !my_strcmp( comm_point, "POP" ) )
         {
             comm = { .num = POP };
-            if ( check_register( assembler.virt_mem + offset ) )
+            if ( check_arg( assembler.virt_mem + offset ) )
             {
-                comm.reg = true;
                 move_offset( &assembler, &offset, &line );
-                value = get_register( assembler.virt_mem + offset, line );
-                PC += ARG_SIZE;
-                if ( value == INCORRECT_REGISTER )
-                    spu.status = Failure;
+
+                if ( assembler.virt_mem[ offset ] == '[' )
+                {
+                    comm.ram = true;
+                    if ( mem_proceed( &assembler, &offset, line, ostream_list, spu.byte_code.desc, &comm, &PC ) == Failure )
+                        spu.status = Failure;
+                }
+                else
+                {
+                    value = get_register( assembler.virt_mem + offset, line );
+                    PC += ARG_SIZE;
+                    if ( value == INCORRECT_REGISTER )
+                        spu.status = Failure;
+                    else
+                        comm.reg = true;
+                    print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
+                }
             }
-            print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
+            else
+                print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
+
         }
         else if ( comm_point[ 0 ] == ':' )
         {
@@ -217,13 +236,13 @@ assemble( char filename[ PATH_MAX ] )
         move_offset( &assembler, &offset, &line ); //Moves position to the next argument
     }
 
-    for ( int i = 0; i < spu.lab.quantity; i++ )
-        if ( spu.lab.pc[ i ] == DONT_EXIST )
+    for ( int i = 0; i < lab.quantity; i++ )
+        if ( lab.pc[ i ] == DONT_EXIST )
         {
             printlg( "Assembling failure, label value unresolved.\n"
                      "Label <");
-            my_printlg( spu.lab.name[ i ] );
-            printlg( ">, defined pc %d\n\n", spu.lab.jmp_pc[ i ] );
+            my_printlg( lab.name[ i ] );
+            printlg( ">, defined pc %d\n\n", lab.jmp_pc[ i ] );
             spu.status = Failure;
         }
 
