@@ -10,6 +10,7 @@
 
 #include "../Stack/utility/errors.h"
 #include "../Stack/utility/log.h"
+#include "../Stack/utility/Utility.h"
 #include "../processor/asm_uitility.h"
 #include "arguments.h"
 #include "compiler.h"
@@ -272,24 +273,25 @@ mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, int des
                     return Failure;
                 }
             }
-            else
+            else if ( assembler->virt_mem[ *offset ] != ']' )
             {
                 printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
                 return Failure;
             }
         }
 
-    if ( mscan_long( assembler->virt_mem + *offset, &con ) == Failure )
+    if ( mscan_long( assembler->virt_mem + *offset, &con ) == Failure && assembler->virt_mem[ *offset ] != ']' )
     {
         printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
         return Failure;
     }
-    else
+    else if ( !com->reg )
     {
         com->con = true;
         *PC += ARG_SIZE;
+        move_offset( assembler, offset, &line );
     }
-    move_offset( assembler, offset, &line );
+
     if ( line > line_b || assembler->virt_mem[ *offset ] != ']' )
     {
         printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );

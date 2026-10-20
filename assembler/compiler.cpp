@@ -11,7 +11,7 @@
 #include "../Stack/utility/log.h"
 #include "../processor/asm_uitility.h"
 #include "arguments.h"
-#include "../Stack/utility/colours.h"
+#include "../Stack/utility/Utility.h"
 
 
 
@@ -247,7 +247,7 @@ assemble( char filename[ PATH_MAX ] )
         }
 
     if ( spu.status != Success )
-        fprintf( stderr, "Compiling failure, check log - file\n" );
+        fprintf( stderr, "Assembling failure, check log - file\n" );
     printlg( "---| End of compilation|---\n\n" );
 
     SPUasm_exit( &spu );
