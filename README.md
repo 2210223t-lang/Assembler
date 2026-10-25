@@ -7,24 +7,24 @@ Repo provide user with assembler and compiler for a custom programming language
 ### Commands
 All available commands
 
-    SQRT - Std sqrt func
-    JMPN - Jumps to an argument if last calculated value was negative
-    HLT - Exit
-    PUSH - Pushes argument into stack
-    ADD - Summarizes last 2 elements of stack
-    DIV - Divides last 2 elemensts of stack
-    OUT - Prints last element of stack
-    POP - Pops last element of stack ( into argument ( register of memory adress ) )
-    SUB - Subtract last 2 elements of stack
-    FACT - Calculates factorial of last element in stack ( if decimal )
-    MULT - Multiplies last 2 elements of stack
-    REST - Cleans stack values
-    JMP - Jumps into argument adress
-    SQR - Calculates square root of last element in stack
-    CALL - Calls function, specified in argument
-    RET - Returns to place, where were called( for functions )
-    JMPP - Jumps to an argument if last calculated value was positive
-    JMPZ - Jumps to an argument if last calculated value was zero
+1.  SQRT - Std sqrt func
+2.  JMPN - Jumps to an argument if last calculated value was negative
+3.  HLT - Exit
+4.  PUSH - Pushes argument into stack
+5.  ADD - Summarizes last 2 elements of stack
+6.  DIV - Divides last 2 elemensts of stack
+7.  OUT - Prints last element of stack
+8.  POP - Pops last element of stack ( into argument ( register of memory adress ) )
+9.  SUB - Subtract last 2 elements of stack
+10. FACT - Calculates factorial of last element in stack ( if decimal )
+11. MULT - Multiplies last 2 elements of stack
+12. REST - Cleans stack values
+13. JMP - Jumps into argument adress
+14. SQR - Calculates square root of last element in stack
+15. CALL - Calls function, specified in argument
+16. RET - Returns to place, where were called( for functions )
+17. JMPP - Jumps to an argument if last calculated value was positive
+18. JMPZ - Jumps to an argument if last calculated value was zero
 
 
 ### Registers
