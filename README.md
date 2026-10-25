@@ -30,16 +30,16 @@ All available commands
 ### Registers
 Names, which user can push and pop in'n out
 
-    REX
-    RAX
-    RBX
-    RCX
-    RDX
-    RSI
-    RDI
-    RSP
-    RBP
-    RCP
+1.  REX
+2.  RAX
+3.  RBX
+4.  RCX
+5.  RDX
+6.  RSI
+7.  RDI
+8.  RSP
+9.  RBP
+10. RCP
 
 
 # Press F to pay respect

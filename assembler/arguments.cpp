@@ -18,7 +18,7 @@
 
 
 StkError
-add_tag( int byte_code, char* tag, size_t PC, labels* lab, size_t line )
+add_tag( char* byte_code, char* tag, size_t PC, labels* lab, size_t line )
 {
     assert( tag );
     assert( lab );
@@ -28,6 +28,8 @@ add_tag( int byte_code, char* tag, size_t PC, labels* lab, size_t line )
     printlg( "---| Adding new tag <" );
     my_printlg( tag );
     printlg( "> |---\n\n" );
+
+    printlg( "Destination -->%zd\n\n", PC );
 
     for ( int i = 0; i < lab->quantity; i++ )
         if ( !my_strcmp( tag, lab->name[ i ] ) && lab->pc[ i ] != DONT_EXIST )
@@ -47,7 +49,9 @@ add_tag( int byte_code, char* tag, size_t PC, labels* lab, size_t line )
             lab->pc[ i ] = PC;
             was_init = true;
 
-            pwrite( byte_code, &PC, sizeof( int64_t ), lab->jmp_pc[ i ] );
+            int64_t arg = PC;
+
+            *( ( stack_data* ) ( byte_code + lab->jmp_pc[ i ] ) ) = arg;
             printlg( "Tag initialized.\n"
                      "Detected jmp forward to this tag %d-->%d\n\n", lab->jmp_pc[ i ], lab->pc[ i ] );
         }
@@ -70,6 +74,7 @@ add_tag( int byte_code, char* tag, size_t PC, labels* lab, size_t line )
             return Failure;
         }
     }
+
 
     lab->pc    [ lab->quantity ] = PC;
     lab->name  [ lab->quantity ] = tag;
@@ -103,8 +108,9 @@ jmp_proceed( FILE* ostream_list, SPU* spu, size_t* PC, size_t* offset, stream* a
     else
     {
         if ( temp != DONT_EXIST )
-            printlg( "Jumping %zd-->%zd\n\n", *PC, temp );
-        write( spu->byte_code.desc, &temp, sizeof( int64_t ) );
+            printlg( "Jumping %zd-->%lld\n\n", *PC, temp );
+
+        *( ( stack_data* ) ( spu->byte_code.virt_mem + *PC + COMM_SIZE) ) = temp;
         fprintf( ostream_list, "%lld", temp );
     }
 }
@@ -114,6 +120,7 @@ int64_t
 jmp_parse( stream* assembler, size_t offset, labels* lab, size_t line_stat, size_t PC )
 {
     assert( assembler );
+    assert( lab );
 
     printlg( ">>Parsing jmp argument on line: %d<<\n\n", line_stat );
 
@@ -208,17 +215,20 @@ get_register( char* assembler, size_t line )
 
 
 StkError
-mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, int desc, instruct* com, size_t* PC )
+mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, char* mem, instruct* com, size_t* PC )
 {
     assert( assembler );
     assert( offset );
     assert( list );
     assert( PC );
 
+    //-----Initializing
     int64_t con = 0;
     int64_t coef = 0;
     int64_t reg = 0;
     size_t line_b = line;
+    size_t pc_back = *PC;
+    //-----End of init
 
     move_offset( assembler, offset, &line );
 
@@ -227,6 +237,8 @@ mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, int des
         printlg( "Assembling failure.\nIncorrect formula on line %zd\n\n", line );
         return Failure;
     }
+
+
 
         if ( assembler->virt_mem[ *offset ] == 'R' )
         {
@@ -237,7 +249,7 @@ mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, int des
                 fprintf( stderr, "Assembling failure.\n\n" );
                 return Failure;
             }
-            *PC += 2 * ARG_SIZE;
+            *PC += 3 * ARG_SIZE;
             com->reg = true;
 
             move_offset( assembler, offset, &line );
@@ -298,21 +310,21 @@ mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, int des
         return Failure;
     }
 
-    write( desc, com, sizeof( instruct ) );
-    fprintf( list, "%d", *( char* ) com );
-
     if ( com->ram & 1 )
     {
+        *( (   instruct* ) mem + pc_back ) = *com;
+
         if ( com->reg & 1 )
         {
-            write( desc,  &reg, sizeof( stack_data ) );
-            write( desc, &coef, sizeof( stack_data ) );
+            *( stack_data* ) ( mem + pc_back + COMM_SIZE ) = reg;
+            *( stack_data* ) ( mem + pc_back + COMM_SIZE + ARG_SIZE ) = coef;
+            pc_back += 2 * ARG_SIZE;
             fprintf( list, " %lld * %lld", reg, coef );
         }
 
         if ( com->con & 1 )
         {
-            write( desc, &con, sizeof( stack_data ) );
+            *( stack_data* )( mem + pc_back + COMM_SIZE ) = con;
             fprintf( list, " %lld", con );
         }
     }
