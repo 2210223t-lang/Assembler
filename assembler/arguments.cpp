@@ -14,81 +14,13 @@
 #include "../processor/asm_uitility.h"
 #include "arguments.h"
 #include "compiler.h"
+#include "labels.h"
+#include "compiler.h"
 
-
-
-StkError
-add_tag( char* byte_code, char* tag, size_t PC, labels* lab, size_t line )
-{
-    assert( tag );
-    assert( lab );
-
-    bool was_init = false;
-
-    printlg( "---| Adding new tag <" );
-    my_printlg( tag );
-    printlg( "> |---\n\n" );
-
-    printlg( "Destination -->%zd\n\n", PC );
-
-    for ( int i = 0; i < lab->quantity; i++ )
-        if ( !my_strcmp( tag, lab->name[ i ] ) && lab->pc[ i ] != DONT_EXIST )
-        {
-            printlg( "Assembling failure\n."
-                     "Attempt to reinitialize label in line: %d\n", line );
-            return Failure;
-        }
-        else if ( lab->pc[ i ] == DONT_EXIST && !my_strcmp( tag, lab->name[ i ] ) )
-        {
-            if ( lab->jmp_pc[ i ] < 0 )
-            {
-                printlg( "Incorrect jmp_pc value in <%s> file, <%s> func, %d line.\n"
-                         "Value is: %d", __FILE__, __FUNCTION__, __LINE__, lab->jmp_pc[ i ] );
-                return Failure;
-            }
-            lab->pc[ i ] = PC;
-            was_init = true;
-
-            int64_t arg = PC;
-
-            *( ( stack_data* ) ( byte_code + lab->jmp_pc[ i ] ) ) = arg;
-            printlg( "Tag initialized.\n"
-                     "Detected jmp forward to this tag %d-->%d\n\n", lab->jmp_pc[ i ], lab->pc[ i ] );
-        }
-    if ( was_init )
-        return Success;
-
-    if ( lab->capacity <= 1 + lab->quantity )
-    {
-        lab->capacity *= 2;
-
-        lab->pc   =   ( size_t* ) realloc( lab->pc,     lab->capacity * sizeof( size_t ) );
-        lab->name =   (  char** ) realloc( lab->name,   lab->capacity * sizeof(  char* ) );
-        lab->jmp_pc = ( size_t* ) realloc( lab->jmp_pc, lab->capacity * sizeof( size_t ) );
-
-        if ( !lab->pc || !lab->name )
-        {
-            fprintf( stderr, "Assembling failure: allocation fault.\n" );
-            printlg(         "Assembling failure: allocation fault.\n"
-                             "File <%s>, function <%s>, line: %d\n\n", __FILE__, __FUNCTION__, __LINE__ );
-            return Failure;
-        }
-    }
-
-
-    lab->pc    [ lab->quantity ] = PC;
-    lab->name  [ lab->quantity ] = tag;
-    lab->jmp_pc[ lab->quantity ] = DONT_EXIST;
-    lab->quantity++;
-
-    printlg( "---| End of tagging |---\n\n" );
-
-    return Success;
-}
 
 
 void
-jmp_proceed( FILE* ostream_list, SPU* spu, size_t* PC, size_t* offset, stream* assembler, size_t* line, labels* lab  )
+jmp_proceed ( FILE* ostream_list, SPU* spu, size_t* PC, size_t* offset, stream* assembler, size_t* line, labels* lab  )
 {
     assert( ostream_list );
     assert( spu );
@@ -117,7 +49,7 @@ jmp_proceed( FILE* ostream_list, SPU* spu, size_t* PC, size_t* offset, stream* a
 
 
 int64_t
-jmp_parse( stream* assembler, size_t offset, labels* lab, size_t line_stat, size_t PC )
+jmp_parse ( stream* assembler, size_t offset, labels* lab, size_t line_stat, size_t PC )
 {
     assert( assembler );
     assert( lab );
@@ -155,25 +87,8 @@ jmp_parse( stream* assembler, size_t offset, labels* lab, size_t line_stat, size
             if ( !my_strcmp ( lab->name[ i ], flag ) && lab->pc[ i ] != DONT_EXIST )
                 return lab->pc[ i ];
 
-        if ( lab->quantity >= lab->capacity )
-        {
-            lab->capacity *= 2;
-            lab->pc =     ( size_t* ) realloc( lab->pc,     lab->capacity * sizeof ( size_t ) );
-            lab->name =   ( char**  ) realloc( lab->name,   lab->capacity * sizeof (  char* ) );
-            lab->jmp_pc = ( size_t* ) realloc( lab->jmp_pc, lab->capacity * sizeof ( size_t ) );
-
-            if ( !lab->pc || !lab->name || !lab->jmp_pc )
-            {
-                printlg(         "Realloc failure in <%s> file, <%s> func, %d line\n", __FILE__, __FUNCTION__, __LINE__ );
-                fprintf( stderr, "Realloc failure in <%s> file, <%s> func, %d line\n", __FILE__, __FUNCTION__, __LINE__ );
-                return ERROR;
-            }
-        }
-
-        lab->pc    [ lab->quantity ] = DONT_EXIST;
-        lab->name  [ lab->quantity ] = assembler->virt_mem + offset;
+        creat_lab( assembler->virt_mem, lab, PC, offset);
         lab->jmp_pc[ lab->quantity ] = PC;
-        lab->quantity++;
         return DONT_EXIST;
     }
 
@@ -182,7 +97,7 @@ jmp_parse( stream* assembler, size_t offset, labels* lab, size_t line_stat, size
 
 
 int64_t
-get_register( char* assembler, size_t line )
+get_register ( char* assembler, size_t line )
 {
     assert( assembler );
 
@@ -215,7 +130,7 @@ get_register( char* assembler, size_t line )
 
 
 StkError
-mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, char* mem, instruct* com, size_t* PC )
+mem_proceed ( stream* assembler, size_t* offset, size_t line, FILE* list, char* mem, instruct* com, size_t* PC )
 {
     assert( assembler );
     assert( offset );
@@ -312,7 +227,7 @@ mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, char* m
 
     if ( com->ram & 1 )
     {
-        *( (   instruct* ) mem + pc_back ) = *com;
+        *( ( instruct* ) mem + pc_back ) = *com;
 
         if ( com->reg & 1 )
         {
@@ -331,4 +246,76 @@ mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, char* m
     fprintf( list, "\n" );
 
     return Success;
+}
+
+
+
+void
+push_proceed( SPU* spu, size_t* PC, stream* assembler, instruct* comm, size_t* offset, size_t line, FILE* ostream_list )
+{
+    assert( spu );
+    assert( PC );
+    assert( assembler );
+    assert( comm );
+    assert( offset );
+    assert( ostream_list );
+
+
+    double value = 0;
+
+
+    if ( *( assembler->virt_mem + *offset ) == '[' )
+    {
+        comm->ram = true;
+        if ( mem_proceed( assembler, offset, line, ostream_list, spu->byte_code.virt_mem, comm, PC ) == Failure )
+            spu->status = Failure;
+    }
+    else if ( mscan_double( assembler->virt_mem + *offset, &value ) == Success )
+    {
+        comm->con = true;
+        print_byn( ostream_list, spu->byte_code.virt_mem, comm, value, assembler->virt_mem + *offset, *PC );
+        *PC += ARG_SIZE;
+    }
+    else
+    {
+        comm->reg = true;
+        value = get_register( assembler->virt_mem + *offset, line );
+        if ( value == INCORRECT_REGISTER )
+            spu->status = Failure;
+        print_byn( ostream_list, spu->byte_code.virt_mem, comm, value, assembler->virt_mem + *offset, *PC );
+        *PC += ARG_SIZE;
+    }
+}
+
+
+void
+pop_proceed( SPU* spu, size_t* PC, stream* assembler, instruct* comm, size_t* offset, size_t* line, FILE* ostream_list )
+{
+    double value = 0;
+
+    if ( check_arg( assembler->virt_mem + *offset ) )
+    {
+        move_offset( assembler, offset, line );
+
+        if ( assembler->virt_mem[ *offset ] == '[' )
+        {
+            comm->ram = true;
+            if ( mem_proceed( assembler, offset, *line, ostream_list, spu->byte_code.virt_mem, comm, PC ) == Failure )
+                spu->status = Failure;
+        }
+        else
+        {
+            value = get_register( assembler->virt_mem + *offset, *line );
+            if ( value == INCORRECT_REGISTER )
+                spu->status = Failure;
+            else
+                comm->reg = true;
+            print_byn( ostream_list, spu->byte_code.virt_mem, comm, value, assembler->virt_mem + *offset, *PC );
+            *PC += ARG_SIZE;
+        }
+    }
+    else
+        print_byn( ostream_list, spu->byte_code.virt_mem, comm, value, assembler->virt_mem + *offset, *PC );
+
+
 }

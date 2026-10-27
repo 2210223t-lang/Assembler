@@ -3,7 +3,7 @@
 #define ASM_DEBUG
 
 #define REG_AM 10
-#define MEMORY_CAPACITY 10
+#define MEMORY_CAPACITY 30
 
 #include <stdlib.h>
 #include <limits.h>
@@ -14,6 +14,7 @@
 ///Func optcodes
 enum codes
 {
+    IN   = -3,
     SQRT = -2,
     JMPN = -1,
     HLT  =  0,
@@ -115,7 +116,7 @@ SPU
  * @return Size in bytes
  */
 uint64_t
-Getsize( const char* filename );
+Getsize ( const char* filename );
 
 /**
  * @brief Scans text string for double variable
@@ -125,13 +126,13 @@ Getsize( const char* filename );
  * @return Exit status
  */
 StkError
-mscan_double( char* text, double* variable );
+mscan_double ( char* text, double* variable );
 
 /**
  * @brief Creates stream for file "name"
  */
 stream
-asm_open( char* name );
+asm_open ( char* name );
 
 /**
  * @brief Calculates current offset for PC
@@ -139,7 +140,7 @@ asm_open( char* name );
  * @param[ in ] assembler where to calculate offset
  */
 size_t
-calc_offset( stream* assembler, size_t* PC );
+calc_offset ( stream* assembler, size_t* PC );
 
 /**
  * @brief Moves offset, line till the next "word"
@@ -147,13 +148,13 @@ calc_offset( stream* assembler, size_t* PC );
  * @details Skips "\n", space symbols
  */
 void
-move_offset( stream* assembler, size_t* offset, size_t* line );
+move_offset ( stream* assembler, size_t* offset, size_t* line );
 
 /**
  * @brief Compares a and b untill the first space of '\0'
  */
 int
-my_strcmp( const char* a, const char* b );
+my_strcmp ( const char* a, const char* b );
 
 /**
  * @brief Dumps essential spu registers

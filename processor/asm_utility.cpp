@@ -14,7 +14,7 @@
 #define ASM_FARFETCH LONG_MAX
 
 uint64_t
-Getsize( const char* filename )
+Getsize ( const char* filename )
 {
     struct stat a = {};
 
@@ -25,7 +25,7 @@ Getsize( const char* filename )
 
 
 StkError
-mscan_double( char* text, double* variable )
+mscan_double ( char* text, double* variable )
 {
     assert( variable );
 
@@ -64,7 +64,7 @@ mscan_double( char* text, double* variable )
 
 
 StkError
-mscan_long( char* text, int64_t* variable )
+mscan_long ( char* text, int64_t* variable )
 {
     assert( text );
     assert( variable );
@@ -83,7 +83,7 @@ mscan_long( char* text, int64_t* variable )
 
 
 void
-labels_exit( labels* lab )
+labels_exit ( labels* lab )
 {
     assert( lab );
 
@@ -98,7 +98,7 @@ labels_exit( labels* lab )
 
 
 StkError
-labels_init( labels* lab )
+labels_init ( labels* lab )
 {
     assert( lab );
 
@@ -120,7 +120,7 @@ labels_init( labels* lab )
 
 
 size_t
-calc_offset( stream* assembler, size_t* PC )
+calc_offset ( stream* assembler, size_t* PC )
 {
     assert( assembler );
     assert( PC );
@@ -141,7 +141,7 @@ calc_offset( stream* assembler, size_t* PC )
 
 
 void
-move_offset( stream* assembler, size_t* offset, size_t* line )
+move_offset ( stream* assembler, size_t* offset, size_t* line )
 {
     assert( assembler );
     assert( offset );
@@ -162,7 +162,7 @@ move_offset( stream* assembler, size_t* offset, size_t* line )
 
 
 int
-my_strcmp( const char* a, const char* b )
+my_strcmp ( const char* a, const char* b )
 {
     assert( a );
     assert( b );
@@ -185,7 +185,7 @@ my_strcmp( const char* a, const char* b )
 
 
 stream
-asm_open( char* name )
+asm_open ( char* name )
 {
     assert( name );
 
@@ -219,7 +219,7 @@ asm_open( char* name )
 }
 
 void
-spu_dump( SPU* spu )//TODO enhance dump
+spu_dump ( SPU* spu )//TODO enhance dump
 {
     assert( spu );
 
@@ -239,7 +239,7 @@ spu_dump( SPU* spu )//TODO enhance dump
 
 
 void
-my_printlg( char* var )
+my_printlg ( char* var )
 {
     assert( var );
 
@@ -249,7 +249,7 @@ my_printlg( char* var )
 
 
 StkError
-SPUrun_init( SPU* spu )
+SPUrun_init ( SPU* spu )
 {
     assert( spu );
 
@@ -283,7 +283,7 @@ SPUrun_init( SPU* spu )
 
 
 void
-SPUrun_exit( SPU* spu )
+SPUrun_exit ( SPU* spu )
 {
     assert( spu );
 
@@ -305,7 +305,7 @@ SPUrun_exit( SPU* spu )
 
 
 StkError
-SPUasm_init( SPU* spu, size_t size )
+SPUasm_init ( SPU* spu, size_t size )
 {
     assert( spu );
 
@@ -325,7 +325,7 @@ SPUasm_init( SPU* spu, size_t size )
 
 
 void
-SPUasm_exit( SPU* spu, size_t PC )
+SPUasm_exit ( SPU* spu, size_t PC )
 {
     assert( spu );
 

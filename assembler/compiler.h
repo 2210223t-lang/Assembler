@@ -15,10 +15,18 @@
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 SPU
-assemble( char filename[ PATH_MAX ] );
+assemble ( char filename[ PATH_MAX ] );
 
 /**
  * @brief Prints into log-file essential data about unknown command
  */
 void
-unk_com( char* comm, stream* assembler, size_t* line );
+unk_com ( char* comm, stream* assembler, size_t* line );
+
+
+void
+assemble_exit( SPU* spu, labels lab );
+
+
+void
+print_byn ( FILE* list, char* byte_code, instruct* command, double value, char* arg, size_t PC );

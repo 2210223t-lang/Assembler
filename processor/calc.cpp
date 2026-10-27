@@ -20,7 +20,7 @@
 
 
 void
-Terminal( int argc, char** argv, char input[ PATH_MAX ] )
+Terminal ( int argc, char** argv, char input[ PATH_MAX ] )
 {
     assert( argv );
     assert( input );
@@ -55,7 +55,7 @@ Terminal( int argc, char** argv, char input[ PATH_MAX ] )
 
 
 void
-print_byte_code( instruct* code, size_t size, size_t current_command )
+print_byte_code ( instruct* code, size_t size, size_t current_command )
 {
     assert( code );
 
@@ -97,7 +97,7 @@ print_byte_code( instruct* code, size_t size, size_t current_command )
 
 
 int
-Start_Calc( SPU* spu )
+Start_Calc ( SPU* spu )
 {
     assert( spu );
 
@@ -291,6 +291,11 @@ Start_Calc( SPU* spu )
                     jmp( &spu->PC, ( size_t* ) ( code + spu->PC + 1 ) );
                 else
                     spu->PC += COMM_SIZE + ARG_SIZE;
+                break;
+
+            case IN:
+                in( spu );
+                spu->PC += COMM_SIZE;
                 break;
 
             default:

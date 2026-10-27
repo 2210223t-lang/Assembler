@@ -10,7 +10,7 @@
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-div( stack* stk, short* past_proc_sign );
+div ( stack* stk, short* past_proc_sign );
 
 /**
  * @brief Multiplies last 2 elements of stk
@@ -18,7 +18,7 @@ div( stack* stk, short* past_proc_sign );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-mult( stack* stk, short* past_proc_sign );
+mult ( stack* stk, short* past_proc_sign );
 
 /**
  * @brief Summarizes last 2 elements of stk
@@ -26,7 +26,7 @@ mult( stack* stk, short* past_proc_sign );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-sum( stack* stk, short* past_proc_sign );
+sum ( stack* stk, short* past_proc_sign );
 
 /**
  * @brief Prints last element of stack
@@ -34,7 +34,7 @@ sum( stack* stk, short* past_proc_sign );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-out( stack* stk );
+out ( stack* stk );
 
 /**
  * @brief Cleans stack
@@ -42,7 +42,7 @@ out( stack* stk );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-rest( stack* stk );
+rest ( stack* stk );
 
 /**
  * @brief Subtracts last 2 elements of stack
@@ -50,7 +50,7 @@ rest( stack* stk );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-sub( stack* stk, short* past_proc_sign );
+sub ( stack* stk, short* past_proc_sign );
 
 /**
  * @brief Calculates square root of last variable in stack
@@ -58,7 +58,7 @@ sub( stack* stk, short* past_proc_sign );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-sqr( stack* stk, short* past_proc_sign );
+sqr ( stack* stk, short* past_proc_sign );
 
 /**
  * @brief Calculates factorial of last value of stack
@@ -66,7 +66,7 @@ sqr( stack* stk, short* past_proc_sign );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-fact( stack* stk );
+fact ( stack* stk );
 
 /**
  * @brief Pushes value into the stack
@@ -74,7 +74,7 @@ fact( stack* stk );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-push( stack* stk, stack_data* value, short* past_proc_sign );
+push ( stack* stk, stack_data* value, short* past_proc_sign );
 
 /**
  * @brief Pops last value of the stack
@@ -82,7 +82,7 @@ push( stack* stk, stack_data* value, short* past_proc_sign );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-pop( stack* stk, stack_data* storage );
+pop ( stack* stk, stack_data* storage );
 
 /**
  * @brief Finds sinus of last value in stack
@@ -90,7 +90,7 @@ pop( stack* stk, stack_data* storage );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-sinus( stack* stk, short* past_proc_sign );
+sinus ( stack* stk, short* past_proc_sign );
 
 
 /**
@@ -99,7 +99,7 @@ sinus( stack* stk, short* past_proc_sign );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-jmp( size_t* PC, size_t* value );
+jmp ( size_t* PC, size_t* value );
 
 
 /**
@@ -125,4 +125,14 @@ call ( SPU* spu, size_t dest );
  *
  * @return Exit status ( Success if OK & Failure otherwise )
  */
-int root ( SPU* spu );
+int
+root ( SPU* spu );
+
+
+/**
+ * @brief Takes double value from the console
+ *
+ * @return Exit status ( Success if OK & Failure otherwise )
+ */
+StkError
+in ( SPU* spu );

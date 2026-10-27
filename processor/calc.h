@@ -16,7 +16,7 @@
  * @param[ out ] input char[ PATH_MAX ] - name of input filestream
  */
 void
-Terminal( int argc, char** argv, char input[ PATH_MAX ] );
+Terminal ( int argc, char** argv, char input[ PATH_MAX ] );
 
 /**
  * @brief Starts calculation
@@ -26,4 +26,4 @@ Terminal( int argc, char** argv, char input[ PATH_MAX ] );
  * @return Exit status ( Success if OK & Failure otherwise )
  */
 int
-Start_Calc( SPU* spu );
+Start_Calc ( SPU* spu );

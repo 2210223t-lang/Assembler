@@ -15,7 +15,7 @@
 
 
 int
-factorial( int limit )
+factorial ( int limit )
 {
     int result = 1;
     for ( int i = 2; i <= limit; i++ )
@@ -25,7 +25,7 @@ factorial( int limit )
 
 
 int
-div( stack* stk, short* past_proc_sign )
+div ( stack* stk, short* past_proc_sign )
 {
     assert( stk );
     assert( past_proc_sign );
@@ -50,7 +50,7 @@ div( stack* stk, short* past_proc_sign )
 
 
 int
-mult( stack* stk, short* past_proc_sign )
+mult ( stack* stk, short* past_proc_sign )
 {
     assert( stk );
     assert( past_proc_sign );
@@ -75,7 +75,7 @@ mult( stack* stk, short* past_proc_sign )
 
 
 int
-sum( stack* stk, short* past_proc_sign )
+sum ( stack* stk, short* past_proc_sign )
 {
     assert( stk );
     assert( past_proc_sign );
@@ -99,7 +99,7 @@ sum( stack* stk, short* past_proc_sign )
 
 
 int
-out( stack* stk )
+out ( stack* stk )
 {
     assert( stk );
 
@@ -115,7 +115,7 @@ out( stack* stk )
 
 
 int
-rest( stack* stk )
+rest ( stack* stk )
 {
     assert( stk );
 
@@ -130,7 +130,7 @@ rest( stack* stk )
 
 
 int
-sub( stack* stk, short* past_proc_sign )
+sub ( stack* stk, short* past_proc_sign )
 {
     assert( stk );
     assert( past_proc_sign );
@@ -155,7 +155,7 @@ sub( stack* stk, short* past_proc_sign )
 
 
 int
-sqr( stack* stk, short* past_proc_sign )
+sqr ( stack* stk, short* past_proc_sign )
 {
     assert( stk );
     assert( past_proc_sign );
@@ -179,7 +179,7 @@ sqr( stack* stk, short* past_proc_sign )
 
 
 int
-fact( stack* stk )
+fact ( stack* stk )
 {
     assert( stk );
 
@@ -205,7 +205,7 @@ fact( stack* stk )
 
 
 int
-sinus( stack* stk, short* past_proc_sign )
+sinus ( stack* stk, short* past_proc_sign )
 {
     assert( stk );
     assert( past_proc_sign );
@@ -234,7 +234,7 @@ sinus( stack* stk, short* past_proc_sign )
 
 
 int
-push( stack* stk, stack_data* value, short* past_proc_sign  )
+push ( stack* stk, stack_data* value, short* past_proc_sign  )
 {
     assert( stk );
     assert( value );
@@ -256,7 +256,7 @@ push( stack* stk, stack_data* value, short* past_proc_sign  )
 
 
 int
-pop( stack* stk, stack_data* storage )
+pop ( stack* stk, stack_data* storage )
 {
     assert( stk );
 
@@ -273,7 +273,7 @@ pop( stack* stk, stack_data* storage )
 
 
 int
-jmp( size_t* PC, size_t* value )
+jmp ( size_t* PC, size_t* value )
 {
     assert( PC );
     assert( value );
@@ -356,5 +356,25 @@ root ( SPU* spu )
 
     printlg( "---| End of root instruction |---\n\n" );
 
+    return Success;
+}
+
+
+StkError
+in ( SPU* spu )
+{
+    assert( spu );
+
+    double temp1 = 0;
+
+    if ( scanf( "%lf", &temp1 ) == -1 )
+    {
+        printlg( "Incorrect console input.\n\n" );
+        return Failure;
+    }
+
+    int64_t result = temp1 * 1000;
+
+    stack_push( &spu->stk, result );
     return Success;
 }

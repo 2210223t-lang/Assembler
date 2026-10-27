@@ -13,3 +13,4 @@ doxyfile
 html
 latex
 interp.cpp
+code/
