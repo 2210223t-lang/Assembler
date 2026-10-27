@@ -110,7 +110,7 @@ jmp_proceed( FILE* ostream_list, SPU* spu, size_t* PC, size_t* offset, stream* a
         if ( temp != DONT_EXIST )
             printlg( "Jumping %zd-->%lld\n\n", *PC, temp );
 
-        *( ( stack_data* ) ( spu->byte_code.virt_mem + *PC + COMM_SIZE) ) = temp;
+        *( ( stack_data* ) ( spu->byte_code.virt_mem + *PC + COMM_SIZE - ARG_SIZE ) ) = temp;
         fprintf( ostream_list, "%lld", temp );
     }
 }
@@ -224,7 +224,7 @@ mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, char* m
 
     //-----Initializing
     int64_t con = 0;
-    int64_t coef = 0;
+    int64_t coef = 1;
     int64_t reg = 0;
     size_t line_b = line;
     size_t pc_back = *PC;
@@ -249,7 +249,7 @@ mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, char* m
                 fprintf( stderr, "Assembling failure.\n\n" );
                 return Failure;
             }
-            *PC += 3 * ARG_SIZE;
+            *PC += 2 * ARG_SIZE;
             com->reg = true;
 
             move_offset( assembler, offset, &line );

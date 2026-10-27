@@ -139,7 +139,7 @@ Start_Calc( SPU* spu )
                     {
                         memcpy( &arg1, code + spu->PC, ARG_SIZE );
                         spu->PC += ARG_SIZE;
-                        arg1 = spu->registers[ arg1 ];
+                        arg1 = spu->registers[ arg1 ] / 1000;
                         memcpy( &arg2, code + spu->PC, ARG_SIZE );
                         spu->PC += ARG_SIZE;
                         arg1 *= arg2;
@@ -183,7 +183,7 @@ Start_Calc( SPU* spu )
                     {
                         memcpy( &arg1, code + spu->PC, ARG_SIZE );
                         spu->PC += ARG_SIZE;
-                        arg1 = spu->registers[ arg1 ];
+                        arg1 = spu->registers[ arg1 ] / 1000;
                         memcpy( &arg2, code + spu->PC, ARG_SIZE );
                         spu->PC += ARG_SIZE;
                         arg1 *= arg2;

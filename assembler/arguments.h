@@ -27,7 +27,7 @@ jmp_parse( stream* assembler, size_t offset, labels* lab, size_t line_stat, size
  * @brief Adds tag into labels
  */
 StkError
-add_tag( int byte_code, char* tag, size_t PC, labels* lab, size_t line );
+add_tag( char* byte_code, char* tag, size_t PC, labels* lab, size_t line );
 
 /**
  * @brief Prints jmp into byte_code and also parse assembler
@@ -45,4 +45,4 @@ get_register( char* assembler, size_t line );
  * @brief Parses argument line as memory equation
  */
 StkError
-mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, int desc, instruct* com, size_t* PC );
+mem_proceed( stream* assembler, size_t* offset, size_t line, FILE* list, char* mem, instruct* com, size_t* PC );

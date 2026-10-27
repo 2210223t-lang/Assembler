@@ -137,9 +137,9 @@ sub( stack* stk, short* past_proc_sign )
 
     printlg( "---SUB instruction---\n\n" );
 
-    uint64_t temp1 = stack_pop( stk );
-    uint64_t temp2 = stack_pop( stk );
-    uint64_t result = ( temp2 - temp1 );
+    int64_t temp1 = stack_pop( stk );
+    int64_t temp2 = stack_pop( stk );
+    int64_t result = ( temp2 - temp1 );
     stack_push( stk, result );
 
     if ( result > 0 )
@@ -163,12 +163,6 @@ sqr( stack* stk, short* past_proc_sign )
     printlg( "---SQR instruction---\n\n" );
 
     double temp = ( double ) stack_pop( stk ) / 1000;
-
-    if ( temp < 0 )
-    {
-        printlg( "Attempt to calculate quadratic root of negative variable\n" );
-        return Failure;
-    }
 
     uint64_t result = temp * temp;
 

@@ -305,14 +305,13 @@ SPUrun_exit( SPU* spu )
 
 
 StkError
-SPUasm_init( SPU* spu )
+SPUasm_init( SPU* spu, size_t size )
 {
     assert( spu );
 
     strcpy( spu->byte_code.name, "code/byte_code.txt" );
 
-    spu->byte_code.desc = open( spu->byte_code.name, O_CREAT | O_WRONLY | O_TRUNC, 0666 );
-    spu->byte_code.size = Getsize( spu->byte_code.name );
+    spu->byte_code.virt_mem = ( char* ) calloc( size, sizeof( char* ) );
 
     if ( spu->byte_code.desc == -1 )
     {
@@ -326,11 +325,15 @@ SPUasm_init( SPU* spu )
 
 
 void
-SPUasm_exit( SPU* spu )
+SPUasm_exit( SPU* spu, size_t PC )
 {
     assert( spu );
 
-    munmap( spu->byte_code.virt_mem, spu->byte_code.size );
+    spu->byte_code.desc = open( spu->byte_code.name, O_WRONLY | O_CREAT | O_TRUNC, 0666 );
+
+    write( spu->byte_code.desc, spu->byte_code.virt_mem, PC );
+
+    free( spu->byte_code.virt_mem );
     close( spu->byte_code.desc );
 }
 

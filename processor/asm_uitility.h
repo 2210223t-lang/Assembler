@@ -183,7 +183,7 @@ SPUrun_init ( SPU* spu );
  * @brief Initializes spu for assembler
  */
 StkError
-SPUasm_init ( SPU* spu );
+SPUasm_init ( SPU* spu, size_t size );
 
 /**
  * @brief Scans text string for long long variable
@@ -211,7 +211,7 @@ labels_exit ( labels* lab );
  * @brief Cleans spu struct for assembler exit
  */
 void
-SPUasm_exit ( SPU* spu );
+SPUasm_exit ( SPU* spu, size_t PC );
 
 /**
  * @brief Checks whether char* argument is a register or not

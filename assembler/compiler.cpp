@@ -29,13 +29,13 @@ unk_com( char* comm, stream* assembler, size_t* line )
 
 
 void
-print_byn( FILE* list, int byte_code_desc, instruct* command, double value, char* arg )
+print_byn( FILE* list, char* byte_code, instruct* command, double value, char* arg, size_t PC )
 {
     assert( list );
     instruct* comm = ( instruct* ) command;
     int64_t valuei = 0;
 
-    write( byte_code_desc, command, sizeof ( instruct ) );
+    *( instruct* ) ( byte_code + PC ) = *command;
     fprintf( list, "%d ",  *( unsigned char* ) comm );
 
     if ( ( comm->num == PUSH || comm->num == POP ) && comm->reg & 1 )
@@ -43,13 +43,13 @@ print_byn( FILE* list, int byte_code_desc, instruct* command, double value, char
 
         fprintf( list, " %lf", value );
         valuei = value;
-        write( byte_code_desc, &valuei, sizeof( int64_t ) );
+        *( stack_data* ) ( byte_code + PC + COMM_SIZE ) = valuei;
     }
     else if ( comm->num == PUSH )
     {
         valuei = value * 1000;
         fprintf( list, " %lf", value );
-        write( byte_code_desc, &valuei , sizeof( int64_t ) );
+        *( stack_data* ) ( byte_code + PC + COMM_SIZE ) = valuei;
     }
 
     fprintf( list, "\n" );
@@ -77,7 +77,7 @@ assemble( char filename[ PATH_MAX ] )
     if ( assembler.desc == -1 || assembler.virt_mem == MAP_FAILED )
         return { .status = Failure };
 
-    SPUasm_init( &spu );
+    SPUasm_init( &spu, assembler.size );
 
     if ( spu.status == Failure )
         return spu;
@@ -109,14 +109,14 @@ assemble( char filename[ PATH_MAX ] )
             if ( *( assembler.virt_mem + offset ) == '[' )
             {
                 comm.ram = true;
-                if ( mem_proceed( &assembler, &offset, line, ostream_list, spu.byte_code.desc, &comm, &PC ) == Failure )
+                if ( mem_proceed( &assembler, &offset, line, ostream_list, spu.byte_code.virt_mem, &comm, &PC ) == Failure )
                     spu.status = Failure;
             }
             else if ( mscan_double( assembler.virt_mem + offset, &value ) == Success )
             {
                 comm.con = true;
+                print_byn( ostream_list, spu.byte_code.virt_mem, &comm, value, assembler.virt_mem + offset, PC );
                 PC += ARG_SIZE;
-                print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
             }
             else
             {
@@ -124,7 +124,7 @@ assemble( char filename[ PATH_MAX ] )
                 value = get_register( assembler.virt_mem + offset, line );
                 if ( value == INCORRECT_REGISTER )
                     spu.status = Failure;
-                print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
+                print_byn( ostream_list, spu.byte_code.virt_mem, &comm, value, assembler.virt_mem + offset, PC );
                 PC += ARG_SIZE;
             }
 
@@ -132,65 +132,65 @@ assemble( char filename[ PATH_MAX ] )
         else if ( !my_strcmp( comm_point, "ADD" ) )
         {
             comm = { .num = ADD };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "DIV" ) )
         {
             comm = { .num = DIV };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "OUT" ) )
         {
             comm = { .num = OUT };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "HLT" ) )
         {
             comm = { .num = HLT };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "MULT" ) )
         {
             comm = { .num = MULT };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "SQR" ) )
         {
             comm = { .num = SQR };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( ( !my_strcmp( comm_point,  "JMP" ) && ( comm = { .num =  JMP } ).num ==  JMP ) ||
                   ( !my_strcmp( comm_point, "JMPP" ) && ( comm = { .num = JMPP } ).num == JMPP ) ||
                   ( !my_strcmp( comm_point, "JMPN" ) && ( comm = { .num = JMPN } ).num == JMPN ) ||
                   ( !my_strcmp( comm_point, "JMPZ" ) && ( comm = { .num = JMPZ } ).num == JMPZ ) )
         {
-            PC += ARG_SIZE;
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
             move_offset( &assembler, &offset, &line );
+            PC += ARG_SIZE;
             jmp_proceed( ostream_list, &spu, &PC, &offset, &assembler, &line, &lab );
         }
         else if ( !my_strcmp( comm_point, "RET" ) )
         {
             comm = { .num = RET };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "CALL" ) )
         {
             comm = { .num = CALL };
-            PC += ARG_SIZE;
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
             move_offset( &assembler, &offset, &line );
+            PC += ARG_SIZE;
             jmp_proceed( ostream_list, &spu, &PC, &offset, &assembler, &line, &lab );
         }
         else if ( !my_strcmp( comm_point, "SQRT" ) )
         {
             comm = { .num = SQRT };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "SUB" ) )
         {
             comm = { .num = SUB };
-            print_byn( ostream_list, spu.byte_code.desc, &comm, 0, 0 );
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "POP" ) )
         {
@@ -202,35 +202,35 @@ assemble( char filename[ PATH_MAX ] )
                 if ( assembler.virt_mem[ offset ] == '[' )
                 {
                     comm.ram = true;
-                    if ( mem_proceed( &assembler, &offset, line, ostream_list, spu.byte_code.desc, &comm, &PC ) == Failure )
+                    if ( mem_proceed( &assembler, &offset, line, ostream_list, spu.byte_code.virt_mem, &comm, &PC ) == Failure )
                         spu.status = Failure;
                 }
                 else
                 {
                     value = get_register( assembler.virt_mem + offset, line );
-                    PC += ARG_SIZE;
                     if ( value == INCORRECT_REGISTER )
                         spu.status = Failure;
                     else
                         comm.reg = true;
-                    print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
+                    print_byn( ostream_list, spu.byte_code.virt_mem, &comm, value, assembler.virt_mem + offset, PC );
+                    PC += ARG_SIZE;
                 }
             }
             else
-                print_byn( ostream_list, spu.byte_code.desc, &comm, value, assembler.virt_mem + offset );
+                print_byn( ostream_list, spu.byte_code.virt_mem, &comm, value, assembler.virt_mem + offset, PC );
 
         }
         else if ( comm_point[ 0 ] == ':' )
         {
-            if ( add_tag( spu.byte_code.desc, comm_point, PC, &lab, line ) == Failure )
+            if ( add_tag( spu.byte_code.virt_mem, comm_point, PC, &lab, line ) == Failure )
                 return { .status = Failure };
         }
-        else
+        else if ( comm_point[ 0 ] != '#' )
         {
             spu.status = Failure;
             unk_com( comm_point, &assembler, &line );
         }
-        if ( *comm_point != ':' )
+        if ( *comm_point != ':' && *comm_point != '#' )
             PC += COMM_SIZE;
 
         move_offset( &assembler, &offset, &line ); //Moves position to the next argument
@@ -250,7 +250,7 @@ assemble( char filename[ PATH_MAX ] )
         fprintf( stderr, "Assembling failure, check log - file\n" );
     printlg( "---| End of compilation|---\n\n" );
 
-    SPUasm_exit( &spu );
+    SPUasm_exit( &spu, PC );
     labels_exit( &lab );
     return spu;
 }
