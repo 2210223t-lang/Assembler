@@ -11,7 +11,6 @@
 #include "../Stack/utility/log.h"
 #include "../processor/asm_uitility.h"
 #include "arguments.h"
-#include "../Stack/utility/Utility.h"
 #include "labels.h"
 #include "compiler.h"
 
@@ -118,6 +117,11 @@ assemble ( char filename[ PATH_MAX ] )
         else if ( !my_strcmp( comm_point, "DIV" ) )
         {
             comm = { .num = DIV };
+            print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
+        }
+        else if ( !my_strcmp( comm_point, "MUSIC" ) )
+        {
+            comm = { .num = MUSC };
             print_byn( ostream_list, spu.byte_code.virt_mem, &comm, 0, 0, PC );
         }
         else if ( !my_strcmp( comm_point, "OUT" ) )

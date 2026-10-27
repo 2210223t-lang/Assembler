@@ -9,6 +9,9 @@
 #include "../Stack/utility/log.h"
 #include "../Stack/stack.h"
 #include "asm_uitility.h"
+#include "../assembler/arguments.h"
+#include "../Stack/utility/colours.h"
+
 
 #define DEPTH 6
 
@@ -377,4 +380,116 @@ in ( SPU* spu )
 
     stack_push( &spu->stk, result );
     return Success;
+}
+
+
+static void
+optcode_decode ( instruct command, int64_t* arg1, instruct* code, SPU* spu )
+{
+    assert( arg1 );
+    assert( spu );
+    assert( code );
+
+    int64_t arg2 = 0;
+
+    if ( command.reg & 1 )
+    {
+        memcpy( arg1, code + spu->PC, ARG_SIZE );
+        spu->PC += ARG_SIZE;
+        *arg1 = spu->registers[ *arg1 ] / 1000;
+        memcpy( &arg2, code + spu->PC, ARG_SIZE );
+        spu->PC += ARG_SIZE;
+        *arg1 *= arg2;
+    }
+    if ( command.con & 1 )
+    {
+        memcpy( &arg2, code + spu->PC, ARG_SIZE );
+        *arg1 += arg2;
+        spu->PC += ARG_SIZE;
+    }
+
+}
+
+
+int
+pop_execute ( instruct command, instruct* code, SPU* spu )
+{
+    assert( code );
+    assert( spu );
+
+    int64_t arg1 = 0;
+
+    if ( command.ram & 1 )
+    {
+        optcode_decode( command, &arg1, code, spu );
+
+        if ( arg1 > 0 && arg1 < MEMORY_CAPACITY * MEMORY_CAPACITY )
+            pop( &spu->stk, spu->memory + arg1  );
+        else
+        {
+            printlg( "Memory overflow.\n"
+                    "Attempt to allocate element with adress %uld\n\n", arg1 );
+            return Failure;
+        }
+        mem_dump( spu );
+    }
+    else if ( command.reg & 1 )
+    {
+        pop( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ) );
+        spu->PC += ARG_SIZE;
+    }
+    else
+        pop( &spu->stk, 0 );
+
+    return Success;
+}
+
+
+int
+push_execute ( instruct command, instruct* code, SPU* spu )
+{
+    assert( code );
+    assert( spu );
+
+    int64_t arg1 = 0;
+
+    if ( command.ram & 1 )
+    {
+        optcode_decode( command, &arg1, code, spu );
+
+        if ( arg1 > 0 && arg1 < MEMORY_CAPACITY * MEMORY_CAPACITY )
+            push( &spu->stk, spu->memory + arg1, &spu->past_proc_sign );
+        else
+        {
+            printlg( "Memory overflow.\n"
+                     "Attempt to allocate element with adress %uld\n\n", arg1 );
+            return Failure;
+        }
+        mem_dump( spu );
+    }
+    else if ( command.reg & 1 )
+    {
+        push( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ), &spu->past_proc_sign );
+        spu->PC += ARG_SIZE;
+    }
+    else
+    {
+        push( &spu->stk, ( stack_data* ) ( code + spu->PC ), &spu->past_proc_sign );
+        spu->PC += ARG_SIZE;
+    }
+
+    return Success;
+}
+
+
+void
+music ()
+{
+    char ans[ 20 ] = "";
+    fprintf( stderr, HCYN "You sure you're built for this shit?\n\n" reset );
+    scanf( "%s", ans );
+    if ( !strcmp( ans, "hellyeah" ) )
+        system( "open https://soundcloud.com/ilya-dedinsky-619322134?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing" );
+    else
+        fprintf( stderr, RED "Then fuckout stupid kid.\n" reset );
 }

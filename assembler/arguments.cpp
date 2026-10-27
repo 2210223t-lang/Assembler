@@ -10,7 +10,6 @@
 
 #include "../Stack/utility/errors.h"
 #include "../Stack/utility/log.h"
-#include "../Stack/utility/Utility.h"
 #include "../processor/asm_uitility.h"
 #include "arguments.h"
 #include "compiler.h"
@@ -88,7 +87,6 @@ jmp_parse ( stream* assembler, size_t offset, labels* lab, size_t line_stat, siz
                 return lab->pc[ i ];
 
         creat_lab( assembler->virt_mem, lab, PC, offset);
-        lab->jmp_pc[ lab->quantity ] = PC;
         return DONT_EXIST;
     }
 

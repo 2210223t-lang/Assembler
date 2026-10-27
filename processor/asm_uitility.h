@@ -14,6 +14,7 @@
 ///Func optcodes
 enum codes
 {
+    MUSC = -4,
     IN   = -3,
     SQRT = -2,
     JMPN = -1,

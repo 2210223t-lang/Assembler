@@ -108,13 +108,12 @@ Start_Calc ( SPU* spu )
         return spu->status;
     }
 
+    //--------Initialization---------
     SPUrun_init( spu );
 
-    int64_t arg1 = 0;
-    int64_t arg2 = 0;
     instruct* code = ( instruct* )spu->byte_code.virt_mem;
     instruct command = { .num = 1 };
-
+    //----------End of init----------
 
     while ( command.num != HLT )
     {
@@ -131,86 +130,14 @@ Start_Calc ( SPU* spu )
 
             case PUSH:
                 spu->PC += COMM_SIZE;
-                arg1 = 0;
-                arg2 = 0;
-                if ( command.ram & 1 )
-                {
-                    if ( command.reg & 1 )
-                    {
-                        memcpy( &arg1, code + spu->PC, ARG_SIZE );
-                        spu->PC += ARG_SIZE;
-                        arg1 = spu->registers[ arg1 ] / 1000;
-                        memcpy( &arg2, code + spu->PC, ARG_SIZE );
-                        spu->PC += ARG_SIZE;
-                        arg1 *= arg2;
-                    }
-                    if ( command.con & 1 )
-                    {
-                        memcpy( &arg2, code + spu->PC, ARG_SIZE );
-                        arg1 += arg2;
-                        spu->PC += ARG_SIZE;
-                        }
-                    if ( arg1 > 0 && arg1 < MEMORY_CAPACITY * MEMORY_CAPACITY )
-                        push( &spu->stk, spu->memory + arg1, &spu->past_proc_sign );
-                    else
-                    {
-                        printlg( "Memory overflow.\n"
-                                "Attempt to allocate element with adress %uld\n\n", arg1 );
-                        return Failure;
-                    }
-                    mem_dump( spu );
-                }
-                else if ( command.reg & 1 )
-                {
-                    push( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ), &spu->past_proc_sign );
-                    spu->PC += ARG_SIZE;
-                }
-                else
-                {
-                    push( &spu->stk, ( stack_data* ) ( code + spu->PC ), &spu->past_proc_sign );
-                    spu->PC += ARG_SIZE;
-                }
+                if ( push_execute( command, code, spu ) == Failure )
+                    return Failure;
                 break;
 
             case POP:
                 spu->PC += COMM_SIZE;
-                arg1 = 0;
-                arg2 = 0;
-
-                if ( command.ram & 1 )
-                {
-                    if ( command.reg & 1 )
-                    {
-                        memcpy( &arg1, code + spu->PC, ARG_SIZE );
-                        spu->PC += ARG_SIZE;
-                        arg1 = spu->registers[ arg1 ] / 1000;
-                        memcpy( &arg2, code + spu->PC, ARG_SIZE );
-                        spu->PC += ARG_SIZE;
-                        arg1 *= arg2;
-                    }
-                    if ( command.con & 1 )
-                    {
-                        memcpy( &arg2, code + spu->PC, ARG_SIZE );
-                        arg1 += arg2;
-                        spu->PC += ARG_SIZE;
-                    }
-                    if ( arg1 > 0 && arg1 < MEMORY_CAPACITY * MEMORY_CAPACITY )
-                        pop( &spu->stk, spu->memory + arg1  );
-                    else
-                    {
-                        printlg( "Memory overflow.\n"
-                                "Attempt to allocate element with adress %uld\n\n", arg1 );
-                        return Failure;
-                    }
-                    mem_dump( spu );
-                }
-                else if ( command.reg & 1 )
-                {
-                    pop( &spu->stk, spu->registers + *( ( stack_data* ) ( code + spu->PC ) ) );
-                    spu->PC += ARG_SIZE;
-                }
-                else
-                    pop( &spu->stk, 0 );
+                if ( pop_execute( command, code, spu ) == Failure )
+                    return Failure;
                 break;
 
             case ADD:
@@ -225,6 +152,11 @@ Start_Calc ( SPU* spu )
 
             case DIV:
                 div( &spu->stk, &spu->past_proc_sign );
+                spu->PC += COMM_SIZE;
+                break;
+
+            case MUSC:
+                music();
                 spu->PC += COMM_SIZE;
                 break;
 

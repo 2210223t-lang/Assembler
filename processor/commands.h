@@ -92,7 +92,6 @@ pop ( stack* stk, stack_data* storage );
 int
 sinus ( stack* stk, short* past_proc_sign );
 
-
 /**
  * @brief Jumps to value destination
  *
@@ -100,7 +99,6 @@ sinus ( stack* stk, short* past_proc_sign );
  */
 int
 jmp ( size_t* PC, size_t* value );
-
 
 /**
  * @brief return to a dest
@@ -110,7 +108,6 @@ jmp ( size_t* PC, size_t* value );
 int
 ret ( SPU* spu );
 
-
 /**
  * @brief calls function
  *
@@ -118,7 +115,6 @@ ret ( SPU* spu );
  */
 int
 call ( SPU* spu, size_t dest );
-
 
 /**
  * @brief calculates square root of the last element in stack
@@ -128,7 +124,6 @@ call ( SPU* spu, size_t dest );
 int
 root ( SPU* spu );
 
-
 /**
  * @brief Takes double value from the console
  *
@@ -136,3 +131,26 @@ root ( SPU* spu );
  */
 StkError
 in ( SPU* spu );
+
+/**
+ * @brief Proceeds pop command
+ *
+ * @details Parses instruct of current pop for ram, constant either register usage
+ *
+ * @return Exit status
+ */
+int
+pop_execute ( instruct command, instruct* code, SPU* spu );
+
+/**
+ * @brief Proceeds push command
+ *
+ * @details Parses instruct of current push for ram, constant either register usage
+ *
+ * @return Exit status
+ */
+int
+push_execute ( instruct command, instruct* code, SPU* spu );
+
+void
+music ();
