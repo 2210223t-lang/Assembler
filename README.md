@@ -1,4 +1,13 @@
+[![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
+
+[![GitHub forks](https://img.shields.io/github/forks/https:/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/network/members)
+[![GitHub stars](https://img.shields.io/github/stars/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/stargazers)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/pulls)
+[![GitHub last commit](https://img.shields.io/github/last-commit/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/commits/main)
+
+
 # Assembler
+
 
 ## Overview
 Repo provide user with assembler and compiler for a custom programming language
