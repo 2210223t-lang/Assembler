@@ -37,7 +37,7 @@ Repo contains strong debugging tool, which is an amazing example for a beginner 
 ├── disassembler <--- Disassembling func
 |   |
 |   ├── disasm.cpp <--- Disasembling func
-|   ├── disasm.h
+|   └── disasm.h
 |
 |
 ├── processor <--- SPU functions
@@ -49,7 +49,7 @@ Repo contains strong debugging tool, which is an amazing example for a beginner 
 |   ├── calc.h
 |   |
 |   ├── commands.cpp    <--- All available commands realisation
-|   ├── commands.h
+|   └── commands.h
 |
 |
 └── code <--- Service folder\
