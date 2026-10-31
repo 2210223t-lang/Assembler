@@ -7,10 +7,58 @@
 
 
 # Assembler
+Repo provide user with tools for a custom stack-based assembler language.
+Pequliarity of this assmebler is a huge variety of usefull features, which can be used in different situations, supporting developers in every kind of situation.
 
 
-## Overview
-Repo provide user with assembler and compiler for a custom programming language
+## Possible usage
+Repo contains strong debugging tool, which is an amazing example for a beginner to stick to.
+
+
+## Tech
+
+### Structure
+```spu
+|
+├── execute.cpp <-- runs programm
+|
+├── assembler <-- contains assembling func
+|   |
+|   ├── arguments.h   <--- Parsing arguments functions
+|   ├── arguments.cpp
+|   |
+|   ├── compiler.cpp  <--- Compiling func
+|   ├── compiler.h
+|   |
+|   ├── labels.cpp    <--- Working with labels
+|   └── labels.h
+|
+|
+├── disassembler <--- Disassembling func
+|   |
+|   ├── disasm.cpp <--- Disasembling func
+|   ├── disasm.h
+|
+|
+├── processor <--- SPU functions
+|   |
+|   ├── asm_utility.cpp <--- Utility functions + config
+|   ├── asm_utility.h
+|   |
+|   ├── calc.cpp        <--- Processor main functions
+|   ├── calc.h
+|   |
+|   ├── commands.cpp    <--- All available commands realisation
+|   ├── commands.h
+|
+|
+└── code <--- Service folder\
+    |
+    ├── byte_code.txt <--- Compiled byte code
+    |
+    └── list_code.txt <--- List of compiled code
+
+```
 
 
 ### Commands
@@ -38,6 +86,10 @@ All available commands
 
 ### Registers
 Names, which user can push and pop in'n out
+
+Example of usage:
+
+```PUSH RAX```
 
 1.  REX
 2.  RAX
