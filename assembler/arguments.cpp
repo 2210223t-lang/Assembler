@@ -99,11 +99,11 @@ get_register ( char* assembler, size_t line )
 {
     assert( assembler );
 
-    if ( !my_strcmp( assembler, "RAX" ) )
+    if ( !my_strcmp( assembler, "RAX" ) || !my_strcmp( assembler, "RICH" ) )
         return RAX;
-    else if ( !my_strcmp( assembler, "RBX" ) )
+    else if ( !my_strcmp( assembler, "RBX" ) || !my_strcmp( assembler, "RUCH" ) )
         return RBX;
-    else if ( !my_strcmp( assembler, "RCX" ) )
+    else if ( !my_strcmp( assembler, "RCX" ) || !my_strcmp( assembler, "RACH" ) )
         return RCX;
     else if ( !my_strcmp( assembler, "RDX" ) )
         return RDX;

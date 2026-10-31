@@ -5,6 +5,7 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/pulls)
 [![GitHub last commit](https://img.shields.io/github/last-commit/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/commits/main)
 
+![Example of program](https://github.com/2210223t-lang/utility/raw/main/2026-10-3117.38.09-ezgif.com-video-to-gif-converter.gif)
 
 # Assembler
 Repo provide user with tools for a custom stack-based assembler language.
@@ -52,7 +53,7 @@ Repo contains strong debugging tool, which is an amazing example for a beginner 
 |   └── commands.h
 |
 |
-└── code <--- Service folder\
+└── code <--- Service folder
     |
     ├── byte_code.txt <--- Compiled byte code
     |
