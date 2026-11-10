@@ -1,9 +1,9 @@
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
 
-[![GitHub forks](https://img.shields.io/github/forks/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/network/members)
-[![GitHub stars](https://img.shields.io/github/stars/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/stargazers)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/pulls)
-[![GitHub last commit](https://img.shields.io/github/last-commit/2210223t-lang/2-linked-list)](https://github.com/2210223t-lang/2-linked-list/commits/main)
+[![GitHub forks](https://img.shields.io/github/forks/2210223t-lang/Assembler)](https://github.com/2210223t-lang/Assembler/network/members)
+[![GitHub stars](https://img.shields.io/github/stars/2210223t-lang/Assembler)](https://github.com/2210223t-lang/Assembler/stargazers)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/2210223t-lang/Assembler)](https://github.com/2210223t-lang/Assembler/pulls)
+[![GitHub last commit](https://img.shields.io/github/last-commit/2210223t-lang/Assembler)](https://github.com/2210223t-lang/Assembler/commits/main)
 
 ![Example of program](https://github.com/2210223t-lang/utility/raw/main/2026-10-3117.38.09-ezgif.com-video-to-gif-converter.gif)
 
